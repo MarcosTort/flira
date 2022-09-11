@@ -1,5 +1,5 @@
 name: flira
-description: A new Flutter package project.
+description: A tool to report Jira issues from a flutter-app.
 version: 0.0.3
 homepage: https://github.com/MarcosTort/flira
 environment:
