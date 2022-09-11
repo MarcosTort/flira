@@ -90,8 +90,10 @@ class Flira {
       if (projects.isEmpty) {
         showDialog(
             context: context,
-            builder: (context) => const Text(
-                'No projects found. Please check your api token and url'));
+            builder: (context) => const AlertDialog(
+              title: Text(
+                  'No projects found. Please check your api token and url'),
+            ));
       } else {
         showDialog(
             barrierDismissible: false,
