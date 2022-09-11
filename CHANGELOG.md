@@ -9,4 +9,5 @@
 ## [0.0.3] 11 September 2022
 
 * Added more description
-* 
+* Jira API error handling
+* Created public repo for flira package
