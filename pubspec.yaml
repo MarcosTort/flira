@@ -1,8 +1,7 @@
 name: flira
 description: A new Flutter package project.
 version: 0.0.1
-homepage:
-
+homepage: https://github.com/MarcosTort/flira
 environment:
   sdk: ">=2.17.6 <3.0.0"
   flutter: ">=1.17.0"
