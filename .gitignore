@@ -14,16 +14,10 @@ build/
 ios/.generated/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.*
-example/ios/Flutter/flutter_export_environment.sh
 example/.flutter-plugins
 example/.flutter-plugins-dependencies
 example/.packages
 example/ios/.generated/
-example/ios/Flutter/Generated.xcconfig
-example/ios/Flutter/Release.xcconfig
 .flutter-plugins
-.gitignore
-example/pubspec.lock
-pubspec.lock
 .flutter-plugins-dependencies
 example/android/.gradle/
