@@ -22,9 +22,10 @@ class Flira {
 
     /// The jira url of the organization
     required this.atlassianUrl,
-  })  : 
-  /// initializing triggering methods
-  _screenshotCallback = ScreenshotCallback(),
+  })  :
+
+        /// initializing triggering methods
+        _screenshotCallback = ScreenshotCallback(),
         _shakeDetector = ShakeDetector.waitForStart(onPhoneShake: () {});
   final ScreenshotCallback _screenshotCallback;
   ShakeDetector _shakeDetector;
@@ -55,10 +56,10 @@ class Flira {
   }
 
   /// This void function will show the report dialog in which we can report our issues
-  
+
   void init({
     required BuildContext context,
-     TriggeringMethod method = TriggeringMethod.none,
+    TriggeringMethod method = TriggeringMethod.none,
   }) async {
     if (method == TriggeringMethod.screenshot) {
       await _screenshotCallback.initialize();
@@ -72,8 +73,7 @@ class Flira {
 
     if (method == TriggeringMethod.shaking) {
       _shakeDetector.stopListening();
-      _shakeDetector = ShakeDetector.autoStart(
-        onPhoneShake: () async {
+      _shakeDetector = ShakeDetector.autoStart(onPhoneShake: () async {
         await displayReportDialog(context);
       });
     }
@@ -87,12 +87,18 @@ class Flira {
 
       /// Here we get the projects of the current atlassianUrl
       final projects = await jiraPlatformApi.projects.getAllProjects();
-
-      showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) => ReportBugDialog(
-              projects: projects, jiraPlatformApi: jiraPlatformApi));
+      if (projects.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => const Text(
+                'No projects found. Please check your api token and url'));
+      } else {
+        showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) => ReportBugDialog(
+                projects: projects, jiraPlatformApi: jiraPlatformApi));
+      }
     } on Exception catch (e) {
       showDialog(
         context: context,
@@ -109,7 +115,7 @@ class Flira {
     }
   }
 
-  void dispose(){
+  void dispose() {
     _screenshotCallback.dispose();
     _shakeDetector.stopListening();
   }
@@ -144,6 +150,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
   @override
   void initState() {
     /// Set the initial project and issue
+
     _project = projects.first;
     _issue = _Issue(
       name: '',

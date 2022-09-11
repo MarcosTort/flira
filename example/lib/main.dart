@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Flira fliraClient = Flira(
-        atlassianApiToken: 'jFa905hefZenLgNixDn30DBB',
+        atlassianApiToken: 'myyQMo9cBvfUmWEgrwQUCA84',
         atlassianUrl: 'marcostrt',
         atlassianUser: 'tort.marcos9@gmail.com');
     fliraClient.init(
@@ -58,12 +58,11 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: MaterialButton(
-                
                 color: const Color.fromARGB(255, 21, 90, 210),
                 onPressed: () => fliraClient.displayReportDialog(context),
                 child: const FittedBox(
                   child: Text(
-                    'Display report dialog mannualy',
+                    'Display the report dialog manually',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
