@@ -1,76 +1,100 @@
-import 'package:flutter/material.dart';
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flira/flira.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+// This scenario demonstrates a simple two-page app.
+//
+// The first route '/' is mapped to Page1Screen, and the second route '/page2'
+// is mapped to Page2Screen. To navigate between pages, press the buttons on the
+// pages.
+//
+// The onPress callbacks use context.go() to navigate to another page. This is
+// equivalent to entering url to the browser url bar directly.
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(App());
+
+/// The main app.
+class App extends StatelessWidget {
+  /// Creates an [App].
+  App({Key? key}) : super(key: key);
+
+  /// The title of the app.
+  static const String title = 'GoRouter Example: Declarative Routes';
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context) => FliraWrapper(
 
-class _MyAppState extends State<MyApp> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    app: MaterialApp.router(
+      routeInformationProvider: _router.routeInformationProvider,
+      routeInformationParser: _router.routeInformationParser,
+      routerDelegate: _router.routerDelegate,
+      title: title,
+      
+    ),
+  );
+
+  final GoRouter _router = GoRouter(
+    routes: <GoRoute>[
+      GoRoute(
+        path: '/',
+        builder: (BuildContext context, GoRouterState state) =>
+            const Page1Screen(),
+        routes: <GoRoute>[
+          GoRoute(
+            path: 'page2',
+            builder: (BuildContext context, GoRouterState state) =>
+                const Page2Screen(),
+          ),
+        ],
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
+    ],
+  );
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+/// The screen of the first page.
+class Page1Screen extends StatelessWidget {
+  /// Creates a [Page1Screen].
+  const Page1Screen({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    Flira fliraClient = Flira(
-        atlassianApiToken: 'myyQMo9cBvfUmWEgrwQUCA84',
-        atlassianUrl: 'marcostrt',
-        atlassianUser: 'tort.marcos9@gmail.com');
-    fliraClient.init(
-      context: context,
-      // Here you can choose how to trigger the Flira client
-      method: TriggeringMethod.screenshot,
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: MaterialButton(
-                color: const Color.fromARGB(255, 21, 90, 210),
-                onPressed: () => fliraClient.displayReportDialog(context),
-                child: const FittedBox(
-                  child: Text(
-                    'Display the report dialog manually',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text(App.title)),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () => context.go('/page2'),
+                child: const Text('Go to page 2'),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+}
+
+/// The screen of the second page.
+class Page2Screen extends StatelessWidget {
+  /// Creates a [Page2Screen].
+  const Page2Screen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text(App.title)),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () => context.go('/'),
+                child: const Text('Go back to home page'),
+              ),
+            ],
+          ),
+        ),
+      );
 }

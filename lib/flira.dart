@@ -552,3 +552,68 @@ class _Issue {
     );
   }
 }
+
+class FliraWrapper extends StatelessWidget {
+  const FliraWrapper({super.key, required this.app});
+  final MaterialApp app;
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(children: [
+        app,
+        const _FliraOverlay()
+      ]),
+    );
+  }
+}
+
+class _FliraOverlay extends StatelessWidget {
+  const _FliraOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    Flira fliraClient = Flira(
+        atlassianApiToken: 'myyQMo9cBvfUmWEgrwQUCA84',
+        atlassianUrl: 'marcostrt',
+        atlassianUser: 'tort.marcos9@gmail.com');
+    fliraClient.init(
+      context: context,
+      // Here you can choose how to trigger the Flira client
+      method: TriggeringMethod.none,
+    );
+    return MaterialApp(
+      
+      builder: (context, child) => _Button(fliraClient: fliraClient),
+    );
+  }
+}
+
+class _Button extends StatelessWidget {
+  const _Button({
+    Key? key,
+    required this.fliraClient,
+  }) : super(key: key);
+
+  final Flira fliraClient;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: GestureDetector(
+        onTap: () {
+          fliraClient.displayReportDialog(context);
+        },
+        child: Container(
+          width: 200,
+          height: 200,
+          color: Colors.red,
+          child: const Center(
+            child: Text('Flira'),
+          ),
+        ),
+      ),
+    );
+  }
+}
