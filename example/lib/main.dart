@@ -21,21 +21,20 @@ void main() => runApp(App());
 class App extends StatelessWidget {
   /// Creates an [App].
   App({Key? key}) : super(key: key);
-
+  
   /// The title of the app.
   static const String title = 'GoRouter Example: Declarative Routes';
 
   @override
   Widget build(BuildContext context) => FliraWrapper(
-
-    app: MaterialApp.router(
-      routeInformationProvider: _router.routeInformationProvider,
-      routeInformationParser: _router.routeInformationParser,
-      routerDelegate: _router.routerDelegate,
-      title: title,
-      
-    ),
-  );
+        context: context,
+        app: MaterialApp.router(
+          routeInformationProvider: _router.routeInformationProvider,
+          routeInformationParser: _router.routeInformationParser,
+          routerDelegate: _router.routerDelegate,
+          title: title,
+        ),
+      );
 
   final GoRouter _router = GoRouter(
     routes: <GoRoute>[
@@ -62,6 +61,7 @@ class Page1Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.amber,
         appBar: AppBar(title: const Text(App.title)),
         body: Center(
           child: Column(

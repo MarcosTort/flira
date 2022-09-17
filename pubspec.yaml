@@ -8,8 +8,11 @@ environment:
 
 dependencies:
   atlassian_apis: ^0.8.0
+  bloc: ^8.1.0
+  equatable: ^2.0.5
   flutter:
     sdk: flutter
+  flutter_bloc: ^8.1.1
   screenshot_callback: ^2.0.2
   shake: ^2.1.0
   

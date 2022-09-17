@@ -1,9 +1,10 @@
 library flira;
 
+import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
 import 'package:screenshot_callback/screenshot_callback.dart';
-import 'package:shake/shake.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum TriggeringMethod {
   screenshot,
@@ -22,13 +23,9 @@ class Flira {
 
     /// The jira url of the organization
     required this.atlassianUrl,
-  })  :
+  });
 
-        /// initializing triggering methods
-        _screenshotCallback = ScreenshotCallback(),
-        _shakeDetector = ShakeDetector.waitForStart(onPhoneShake: () {});
-  final ScreenshotCallback _screenshotCallback;
-  ShakeDetector _shakeDetector;
+  /// initializing triggering methods
 
   /// This method returns the atlassian api client
   Future<j.ApiClient> _getApiClient() async {
@@ -56,28 +53,6 @@ class Flira {
   }
 
   /// This void function will show the report dialog in which we can report our issues
-
-  void init({
-    required BuildContext context,
-    TriggeringMethod method = TriggeringMethod.none,
-  }) async {
-    if (method == TriggeringMethod.screenshot) {
-      await _screenshotCallback.initialize();
-      await _screenshotCallback.checkPermission();
-      _screenshotCallback.addListener(
-        () async {
-          await displayReportDialog(context);
-        },
-      );
-    }
-
-    if (method == TriggeringMethod.shaking) {
-      _shakeDetector.stopListening();
-      _shakeDetector = ShakeDetector.autoStart(onPhoneShake: () async {
-        await displayReportDialog(context);
-      });
-    }
-  }
 
   Future<void> displayReportDialog(BuildContext context) async {
     try {
@@ -115,11 +90,6 @@ class Flira {
         ),
       );
     }
-  }
-
-  void dispose() {
-    _screenshotCallback.dispose();
-    _shakeDetector.stopListening();
   }
 
   final String atlassianUser;
@@ -554,37 +524,77 @@ class _Issue {
 }
 
 class FliraWrapper extends StatelessWidget {
-  const FliraWrapper({super.key, required this.app});
+  const FliraWrapper({
+    super.key,
+    required this.app,
+    required this.context,
+  });
   final MaterialApp app;
+  final BuildContext context;
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Stack(children: [
         app,
-        const _FliraOverlay()
+        BlocProvider(
+          create: (ctx) => FliraBloc(),
+          child: const _FliraOverlay(),
+        )
       ]),
     );
   }
 }
 
 class _FliraOverlay extends StatelessWidget {
-  const _FliraOverlay();
-
+  const _FliraOverlay({
+    Key? key,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final screenshotCallback = ScreenshotCallback(requestPermissions: true);
+    screenshotCallback.initialize();
+    screenshotCallback.checkPermission();
+
     Flira fliraClient = Flira(
-        atlassianApiToken: 'myyQMo9cBvfUmWEgrwQUCA84',
+        atlassianApiToken: 'gFlTcBrLbOudUyOuLBYc3DA0',
         atlassianUrl: 'marcostrt',
         atlassianUser: 'tort.marcos9@gmail.com');
-    fliraClient.init(
-      context: context,
-      // Here you can choose how to trigger the Flira client
-      method: TriggeringMethod.none,
+    screenshotCallback.addListener(
+      () {
+        print('object');
+        context.read<FliraBloc>().add(FliraTriggeredEvent());
+      },
     );
-    return MaterialApp(
-      
-      builder: (context, child) => _Button(fliraClient: fliraClient),
+
+    return BlocBuilder<FliraBloc, FliraState>(
+      builder: (context, state) {
+        final width = state.materialAppWidth;
+        final height = state.materialAppHeight;
+        return Align(
+          alignment: Alignment.center,
+          child: AnimatedContainer(
+            curve: Curves.easeInOutExpo,
+            duration: const Duration(milliseconds: 400),
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
+            ),
+            width: width,
+            height: height,
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              color: Colors.black,
+              builder: (ctx, child) => Navigator(
+                onGenerateRoute: (settings) => MaterialPageRoute(
+                  builder: (context) => _Button(
+                    fliraClient: fliraClient,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -594,26 +604,53 @@ class _Button extends StatelessWidget {
     Key? key,
     required this.fliraClient,
   }) : super(key: key);
-
   final Flira fliraClient;
-
   @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: GestureDetector(
-        onTap: () {
-          fliraClient.displayReportDialog(context);
-        },
-        child: Container(
-          width: 200,
-          height: 200,
-          color: Colors.red,
-          child: const Center(
-            child: Text('Flira'),
+  Widget build(BuildContext ctx) {
+    return BlocBuilder<FliraBloc, FliraState>(
+      builder: (context, state) {
+        final width = state.initialButtonWidth;
+        final height = state.initialButtonHeight;
+        return AnimatedPadding(
+          padding: EdgeInsets.only(
+            bottom: state.padding!,
           ),
-        ),
-      ),
+          duration: const Duration(milliseconds: 450),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: GestureDetector(
+              onHorizontalDragStart: (details) {
+                context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+              },
+              onTap: () async {
+                ctx.read<FliraBloc>().add(InitialButtonTappedEvent());
+                await fliraClient
+                    .displayReportDialog(ctx)
+                    .whenComplete(() => null);
+              },
+              child: Material(
+                  
+                borderRadius: BorderRadius.circular(20),
+                child: AnimatedContainer(
+                  curve: Curves.easeInOutExpo,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color: Color.fromARGB(
+                      255,
+                      7,
+                      85,
+                      210,
+                    ),
+                  ),
+                  duration: const Duration(milliseconds: 400),
+                  width: width,
+                  height: height,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
