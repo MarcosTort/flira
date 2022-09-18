@@ -11,3 +11,9 @@
 * Added more description
 * Jira API error handling
 * Created public repo for flira package
+
+## [0.1.0] 17 September 2022
+
+* Implemented a small floating button to display the dialog
+* Created a wrapper to make it compatible with MaterialApp.router.
+* Started using Bloc for the state management.

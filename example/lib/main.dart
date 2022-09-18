@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flira/flira.dart';
+import 'package:flira/flira.dart' as flira;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,11 +26,11 @@ class App extends StatelessWidget {
   static const String title = 'GoRouter Example: Declarative Routes';
 
   @override
-  Widget build(BuildContext context) => FliraWrapper(
-        atlassianApiToken: 'TxS1UBrLD6f8Rjsbk6brA81D',
+  Widget build(BuildContext context) => flira.FliraWrapper(
+        atlassianApiToken: 'IDpq97U8iXqt4mQOy0F06E2E',
         atlassianUrlPrefix: 'marcostrt',
         atlassianUser: 'tort.marcos9@gmail.com',
-        triggeringMethod: TriggeringMethod.shaking,
+        triggeringMethod: flira.TriggeringMethod.screenshot,
         context: context,
         app: MaterialApp.router(
           routeInformationProvider: _router.routeInformationProvider,
@@ -65,7 +65,7 @@ class Page1Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: Colors.amber,
+        backgroundColor: const Color.fromARGB(255, 164, 126, 126),
         appBar: AppBar(title: const Text(App.title)),
         body: Center(
           child: Column(
