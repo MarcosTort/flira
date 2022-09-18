@@ -529,11 +529,17 @@ class FliraWrapper extends StatelessWidget {
     super.key,
     required this.app,
     required this.context,
+    required this.atlassianApiToken,
+    required this.atlassianUser,
+    required this.atlassianUrlPrefix,
     this.triggeringMethod = TriggeringMethod.none,
   });
   final MaterialApp app;
   final BuildContext context;
   final TriggeringMethod triggeringMethod;
+  final String atlassianApiToken;
+  final String atlassianUser;
+  final String atlassianUrlPrefix;
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -542,7 +548,12 @@ class FliraWrapper extends StatelessWidget {
         app,
         BlocProvider(
           create: (ctx) => FliraBloc(),
-          child: _FliraOverlay(triggeringMethod: triggeringMethod),
+          child: _FliraOverlay(
+            triggeringMethod: triggeringMethod,
+            atlassianApiToken: atlassianApiToken,
+            atlassianUser: atlassianUser,
+            atlassianUrlPrefix: atlassianUrlPrefix,
+          ),
         )
       ]),
     );
@@ -554,15 +565,22 @@ const curve = Curves.linearToEaseOut;
 class _FliraOverlay extends StatelessWidget {
   const _FliraOverlay({
     required this.triggeringMethod,
+    required this.atlassianApiToken,
+    required this.atlassianUser,
+    required this.atlassianUrlPrefix,
     Key? key,
   }) : super(key: key);
   final TriggeringMethod triggeringMethod;
+  final String atlassianApiToken;
+  final String atlassianUser;
+  final String atlassianUrlPrefix;
   @override
   Widget build(BuildContext context) {
     Flira fliraClient = Flira(
-        atlassianApiToken: 'TxS1UBrLD6f8Rjsbk6brA81D',
-        atlassianUrl: 'marcostrt',
-        atlassianUser: 'tort.marcos9@gmail.com');
+      atlassianApiToken: atlassianApiToken,
+      atlassianUser: atlassianUser,
+      atlassianUrl: atlassianUrlPrefix,
+    );
     if (triggeringMethod == TriggeringMethod.screenshot) {
       final screenshotCallback = ScreenshotCallback(requestPermissions: true);
       screenshotCallback.initialize();
