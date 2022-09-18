@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
 import 'package:screenshot_callback/screenshot_callback.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shake/shake.dart';
 
 enum TriggeringMethod {
   screenshot,
@@ -528,9 +529,11 @@ class FliraWrapper extends StatelessWidget {
     super.key,
     required this.app,
     required this.context,
+    this.triggeringMethod = TriggeringMethod.none,
   });
   final MaterialApp app;
   final BuildContext context;
+  final TriggeringMethod triggeringMethod;
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -539,42 +542,53 @@ class FliraWrapper extends StatelessWidget {
         app,
         BlocProvider(
           create: (ctx) => FliraBloc(),
-          child: const _FliraOverlay(),
+          child: _FliraOverlay(triggeringMethod: triggeringMethod),
         )
       ]),
     );
   }
 }
 
+const curve = Curves.linearToEaseOut;
+
 class _FliraOverlay extends StatelessWidget {
   const _FliraOverlay({
+    required this.triggeringMethod,
     Key? key,
   }) : super(key: key);
+  final TriggeringMethod triggeringMethod;
   @override
   Widget build(BuildContext context) {
-    final screenshotCallback = ScreenshotCallback(requestPermissions: true);
-    screenshotCallback.initialize();
-    screenshotCallback.checkPermission();
-
     Flira fliraClient = Flira(
-        atlassianApiToken: 'gFlTcBrLbOudUyOuLBYc3DA0',
+        atlassianApiToken: 'TxS1UBrLD6f8Rjsbk6brA81D',
         atlassianUrl: 'marcostrt',
         atlassianUser: 'tort.marcos9@gmail.com');
-    screenshotCallback.addListener(
-      () {
-        print('object');
-        context.read<FliraBloc>().add(FliraTriggeredEvent());
-      },
-    );
+    if (triggeringMethod == TriggeringMethod.screenshot) {
+      final screenshotCallback = ScreenshotCallback(requestPermissions: true);
+      screenshotCallback.initialize();
+      screenshotCallback.checkPermission();
+
+      screenshotCallback.addListener(
+        () {
+          context.read<FliraBloc>().add(FliraTriggeredEvent());
+        },
+      );
+    } else if (triggeringMethod == TriggeringMethod.shaking) {
+      ShakeDetector shakeDetector = ShakeDetector.autoStart(
+        onPhoneShake: () {
+          context.read<FliraBloc>().add(FliraTriggeredEvent());
+        },
+      );
+    }
 
     return BlocBuilder<FliraBloc, FliraState>(
       builder: (context, state) {
         final width = state.materialAppWidth;
         final height = state.materialAppHeight;
         return Align(
-          alignment: Alignment.center,
+          alignment: state.alignment!,
           child: AnimatedContainer(
-            curve: Curves.easeInOutExpo,
+            curve: curve,
             duration: const Duration(milliseconds: 400),
             decoration: const BoxDecoration(
               color: Colors.transparent,
@@ -611,15 +625,13 @@ class _Button extends StatelessWidget {
       builder: (context, state) {
         final width = state.initialButtonWidth;
         final height = state.initialButtonHeight;
-        return AnimatedPadding(
-          padding: EdgeInsets.only(
-            bottom: state.padding!,
-          ),
-          duration: const Duration(milliseconds: 450),
-          child: Align(
-            alignment: Alignment.bottomCenter,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: AnimatedAlign(
+            duration: const Duration(milliseconds: 450),
+            alignment: Alignment.center,
             child: GestureDetector(
-              onHorizontalDragStart: (details) {
+              onDoubleTap: () {
                 context.read<FliraBloc>().add(FliraButtonDraggedEvent());
               },
               onTap: () async {
@@ -629,12 +641,11 @@ class _Button extends StatelessWidget {
                     .whenComplete(() => null);
               },
               child: Material(
-                  
-                borderRadius: BorderRadius.circular(20),
+                shape: const CircleBorder(),
                 child: AnimatedContainer(
-                  curve: Curves.easeInOutExpo,
+                  curve: curve,
                   decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    shape: BoxShape.circle,
                     color: Color.fromARGB(
                       255,
                       7,
@@ -645,6 +656,22 @@ class _Button extends StatelessWidget {
                   duration: const Duration(milliseconds: 400),
                   width: width,
                   height: height,
+                  child: Center(
+                    child: state.status == FliraStatus.initial
+                        ? const FittedBox(
+                            child: Text(
+                              'Flira',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          )
+                        : const CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                  ),
                 ),
               ),
             ),

@@ -21,12 +21,13 @@ void main() => runApp(App());
 class App extends StatelessWidget {
   /// Creates an [App].
   App({Key? key}) : super(key: key);
-  
+
   /// The title of the app.
   static const String title = 'GoRouter Example: Declarative Routes';
 
   @override
   Widget build(BuildContext context) => FliraWrapper(
+        triggeringMethod: TriggeringMethod.shaking,
         context: context,
         app: MaterialApp.router(
           routeInformationProvider: _router.routeInformationProvider,
@@ -61,7 +62,7 @@ class Page1Screen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.amber,
+        backgroundColor: Colors.amber,
         appBar: AppBar(title: const Text(App.title)),
         body: Center(
           child: Column(
