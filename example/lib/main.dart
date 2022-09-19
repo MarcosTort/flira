@@ -27,7 +27,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => flira.FliraWrapper(
-        atlassianApiToken: 'IDpq97U8iXqt4mQOy0F06E2E',
+        atlassianApiToken: 'cuCO5awLzqU5h1OsbidmD9FB',
         atlassianUrlPrefix: 'marcostrt',
         atlassianUser: 'tort.marcos9@gmail.com',
         triggeringMethod: flira.TriggeringMethod.screenshot,
