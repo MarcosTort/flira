@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'flira_wrapper/flira_wrapper.dart';
 import 'report_dialog/report_dialog.dart';
 
-
 /// This is the main class
 class Flira {
   Flira({
@@ -64,12 +63,11 @@ class Flira {
             context: context,
             builder: (context) => const AlertDialog(
                   title: Text(
-                      'No projects found. Please check your api token and url'),
+                    'No projects found. Please check your api token and url',
+                  ),
                 ));
       } else {
-        
         showDialog(
-
             barrierDismissible: false,
             context: context,
             builder: (context) => ReportBugDialog(
@@ -108,12 +106,16 @@ class FliraWrapper extends StatelessWidget {
   });
   final MaterialApp app;
   final BuildContext context;
+
   /// Triggering method for the client
   final TriggeringMethod triggeringMethod;
-  /// Atlassian API token 
+
+  /// Atlassian API token
   final String atlassianApiToken;
+
   /// Atlassian user email
   final String atlassianUser;
+
   /// Atlassian url prefix of your jira cloud. Like https://yourcompany.atlassian.net (yourcompany)
   final String atlassianUrlPrefix;
   @override
@@ -136,11 +138,10 @@ class FliraWrapper extends StatelessWidget {
   }
 }
 
-
-
 enum TriggeringMethod {
   screenshot,
   shaking,
   none,
 }
+
 const curve = Curves.linearToEaseOut;

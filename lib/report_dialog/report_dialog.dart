@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
@@ -35,7 +34,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
     _issue = _Issue(
       name: '',
       project: _project,
-      key: _project.key,
+      projectKey: _project.key,
       issueType: 'Bug',
       description: '',
     );
@@ -102,7 +101,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           _project = value!;
                           _issue = _issue.copyWith(
                             project: _project,
-                            key: _project.key,
+                            projectKey: _project.key,
                           );
                         });
                       },
@@ -197,13 +196,13 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
 
 class _Issue {
   const _Issue(
-      {this.key,
+      {this.projectKey,
       this.name,
       this.description,
       this.issueType,
       this.status,
       this.project});
-  final String? key;
+  final String? projectKey;
   final String? name;
   final String? description;
   final String? issueType;
@@ -211,7 +210,7 @@ class _Issue {
   final j.Project? project;
 
   _Issue copyWith({
-    String? key,
+    String? projectKey,
     String? name,
     String? description,
     String? issueType,
@@ -219,7 +218,7 @@ class _Issue {
     j.Project? project,
   }) {
     return _Issue(
-      key: key ?? this.key,
+      projectKey: projectKey ?? this.projectKey,
       name: name ?? this.name,
       description: description ?? this.description,
       issueType: issueType ?? this.issueType,
@@ -249,99 +248,98 @@ class _SubmitTicketButton extends StatelessWidget {
       onPressed: issue.name.toString().isEmpty ||
               issue.description.toString().isEmpty
           ? null
-          : () {
+          : () async {
               /// Create a new issue
-              jiraPlatformApi.issues
+              final send = await jiraPlatformApi.issues
                   .createIssue(
-                body: j.IssueUpdateDetails(
-                  fields: {
-                    'project': {
-                      'key': issue.key,
-                    },
-                    'summary': issue.name,
-                    'attachment': [],
-                    "description": {
-                      "type": "doc",
-                      "version": 1,
-                      "content": [
-                        {
-                          "type": "paragraph",
-                          "content": [
-                            {
-                              "type": "text",
-                              "text": '${issue.description}',
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    'issuetype': {
-                      'name': issue.issueType,
-                    },
+                      body: j.IssueUpdateDetails(
+                fields: {
+                  'project': {
+                    'key': issue.projectKey,
                   },
-                ),
-              )
-                  .whenComplete(() {
-                
-                var attachment = j.Attachment(
-                  filename: 'test.txt',
-                  mimeType: 'text/plain',
-                  content: base64Encode(utf8.encode('Test attachment')),
-                );
-                jiraPlatformApi.issueAttachments
-                    .addAttachment(issueIdOrKey: issueIdOrKey, file: file);
-              })
+                  'summary': issue.name,
+                  "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": '${issue.description}',
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  'issuetype': {
+                    'name': issue.issueType,
+                  },
+                },
+              ))
+                  .
 
-                /// Catching the error if the ticket is not created
-                ..catchError((onError) {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('Error'),
-                          content: Text(onError.toString()),
-                          actions: [
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Ok'))
-                          ],
-                        );
-                      });
-                })
-
-                /// If the ticket is created successfully
-                ..whenComplete(
-                  () => showDialog(
+                  /// Catching the error if the ticket is not created
+                  catchError((onError) {
+                showDialog(
                     context: context,
                     builder: (context) {
                       return AlertDialog(
-                        title: const Text('Success'),
-                        content:
-                            const Text('Do you want to create another ticket?'),
+                        title: const Text('Error'),
+                        content: Text(onError.toString()),
                         actions: [
                           TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Yes'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            },
-                            child: const Text(
-                              'No',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Ok'))
                         ],
                       );
-                    },
-                  ),
+                    });
+              })
+
+                  /// If the ticket is created successfully
+                  .whenComplete(() {
+                   
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    
+                    return AlertDialog(
+                      title: const Text('Success'),
+                      content:
+                          const Text('Do you want to create another ticket?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Yes'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            'No',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
+              });
+                await Future.delayed(const Duration(seconds: 10));
+                var file = j.MultipartFile.fromString(
+                  'test.txt',
+                  'Test attachment',
+                );
+                
+                await jiraPlatformApi.issueAttachments
+                    .addAttachment(issueIdOrKey: send.id??'', file: file );
             },
       color: const Color.fromARGB(255, 8, 0, 255).withOpacity(0.7),
       child: const Text('Send ticket',
