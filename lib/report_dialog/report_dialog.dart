@@ -1,7 +1,9 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'widgets/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 // ignore: unused_import
@@ -180,10 +182,9 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           final result = await FilePicker.platform.pickFiles(
                             type: FileType.image,
                           );
-                          setState(()  {
+                          setState(() {
                             _attachment = result;
                           });
-                          
                         },
                         icon: const Icon(Icons.attach_file_outlined))
                   ],
@@ -199,11 +200,123 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           Navigator.pop(context);
                         },
                         child: const Text('Cancel')),
-                    _SubmitTicketButton(
-                      jiraPlatformApi: jiraPlatformApi,
-                      issue: _issue,
-                      attachments: _attachment,
-                    ),
+                    MaterialButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      disabledColor: Colors.grey,
+                      onPressed: _issue.name.toString().isEmpty ||
+                              _issue.description.toString().isEmpty
+                          ? null
+                          : () async {
+                              /// Create a new issue
+                              final send = await jiraPlatformApi.issues
+                                  .createIssue(
+                                      body: j.IssueUpdateDetails(
+                                fields: {
+                                  'project': {
+                                    'key': _issue.projectKey,
+                                  },
+                                  'summary': _issue.name,
+                                  "description": {
+                                    "type": "doc",
+                                    "version": 1,
+                                    "content": [
+                                      {
+                                        "type": "paragraph",
+                                        "content": [
+                                          {
+                                            "type": "text",
+                                            "text": '${_issue.description}',
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  'issuetype': {
+                                    'name': _issue.issueType,
+                                  },
+                                },
+                              ))
+                                  .
+
+                                  /// Catching the error if the ticket is not created
+                                  catchError((onError) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text('Error'),
+                                        content: Text(onError.toString()),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                context
+                                                .read<FliraBloc>()
+                                                .add(FliraButtonDraggedEvent());
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Ok'))
+                                        ],
+                                      );
+                                    });
+                              })
+
+                                  /// If the ticket is created successfully
+                                  .whenComplete(() {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Success'),
+                                      content: const Text(
+                                          'Do you want to create another ticket?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text('Yes'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            Navigator.pop(context);
+                                            context
+                                                .read<FliraBloc>()
+                                                .add(FliraButtonDraggedEvent());
+                                          },
+                                          child: const Text(
+                                            'No',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              });
+
+                              final multiPartFile =
+                                  await MultipartFile.fromPath(
+                                      'file', _attachment!.paths.first!,
+                                      filename: _attachment!.names.first);
+
+                              await jiraPlatformApi.issueAttachments
+                                  .addAttachment(
+                                      issueIdOrKey: send.id ?? '',
+                                      file: multiPartFile);
+                              setState(() {
+                                _attachment = null;
+                              });
+                            },
+                      color:
+                          const Color.fromARGB(255, 8, 0, 255).withOpacity(0.7),
+                      child: const Text('Send ticket',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700)),
+                    )
                   ],
                 )
               ],

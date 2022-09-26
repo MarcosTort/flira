@@ -16,6 +16,10 @@ class FliraState extends Equatable {
     this.alignment,
     this.status,
     this.filePickerResult,
+    this.atlassianApiToken,
+    this.atlassianUser,
+    this.atlassianUrlPrefix,
+    required this.triggeringMethod,
   });
   const FliraState.initial()
       : this(
@@ -25,6 +29,7 @@ class FliraState extends Equatable {
           initialButtonWidth: 0,
           alignment: Alignment.bottomRight,
           status: FliraStatus.initial,
+          triggeringMethod: TriggeringMethod.none
         );
   final double? materialAppWidth;
   final double? materialAppHeight;
@@ -33,6 +38,10 @@ class FliraState extends Equatable {
   final AlignmentGeometry? alignment;
   final FliraStatus? status;
   final FilePickerResult? filePickerResult;
+  final TriggeringMethod triggeringMethod;
+  final String? atlassianApiToken;
+  final String? atlassianUser;
+  final String? atlassianUrlPrefix;
 
   FliraState copyWith({
     double? materialAppWidth,
@@ -42,6 +51,12 @@ class FliraState extends Equatable {
     AlignmentGeometry? alignment,
     FliraStatus? status,
     FilePickerResult? filePickerResult,
+    TriggeringMethod? triggeringMethod,
+    String? atlassianApiToken,
+    String? atlassianUser,
+    String? atlassianUrlPrefix,
+
+
   }) {
     return FliraState(
       materialAppWidth: materialAppWidth ?? this.materialAppWidth,
@@ -51,6 +66,12 @@ class FliraState extends Equatable {
       filePickerResult: filePickerResult ?? this.filePickerResult,
       alignment: alignment ?? this.alignment,
       status: status ?? this.status,
+      triggeringMethod: triggeringMethod ?? this.triggeringMethod,
+      atlassianApiToken: atlassianApiToken ?? this.atlassianApiToken,
+      atlassianUser: atlassianUser ?? this.atlassianUser,
+      atlassianUrlPrefix: atlassianUrlPrefix ?? this.atlassianUrlPrefix,
+
+      
     );
   }
 
@@ -63,5 +84,9 @@ class FliraState extends Equatable {
         alignment,
         status,
         filePickerResult,
+        triggeringMethod,
+        atlassianApiToken,
+        atlassianUser,
+        atlassianUrlPrefix,
       ];
 }

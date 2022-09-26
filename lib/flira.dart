@@ -4,7 +4,6 @@ import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'flira_wrapper/flira_wrapper.dart';
 import 'report_dialog/report_dialog.dart';
 
@@ -24,14 +23,14 @@ class Flira {
   /// initializing triggering methods
 
   /// This method returns the atlassian api client
-  Future<j.ApiClient> _getApiClient() async {
+  Future<j.ApiClient> _getApiClient(
+      String url, String user, String token) async {
     try {
-      final uri = '$atlassianUrl.atlassian.net';
+      final uri = '$url.atlassian.net';
       final j.ApiClient result = j.ApiClient.basicAuthentication(
         Uri.https(uri, ''),
-        //TODO: Handle a wrong atlassianUser
-        user: atlassianUser,
-        apiToken: atlassianApiToken,
+        user: user,
+        apiToken: token,
       );
       return result;
     } on Exception catch (e) {
@@ -52,7 +51,12 @@ class Flira {
 
   Future<void> displayReportDialog(BuildContext context) async {
     try {
-      final apiClient = await _getApiClient();
+      final state = context.read<FliraBloc>().state;
+      final url = state.atlassianUrlPrefix;
+      final apiToken = state.atlassianApiToken;
+      final user = state.atlassianUser;
+      final apiClient =
+          await _getApiClient(url ?? '', user ?? '', apiToken ?? '');
 
       final jiraPlatformApi = await _getJiraPlatformApi(apiClient);
 
@@ -60,12 +64,69 @@ class Flira {
       final projects = await jiraPlatformApi.projects.getAllProjects();
       if (projects.isEmpty) {
         showDialog(
-            context: context,
-            builder: (context) => const AlertDialog(
-                  title: Text(
-                    'No projects found. Please check your api token and url',
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Column(
+              children:  const [
+                Text(
+                  'No projects found. Please check your api token and url',
+                ),
+
+                Text('To get a new token, go to: https://id.atlassian.com/manage-profile/security/api-tokens'),
+              ],
+            ),
+            actions: [
+              TextFormField(
+                initialValue: context
+                    .select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
+                onChanged: (value) => context.read<FliraBloc>().add(
+                      UrlTextFieldOnChangedEvent(value),
+                    ),
+                decoration: const InputDecoration(
+                  hintText: 'Enter your jira server name',
+                ),
+              ),
+              TextFormField(
+                initialValue: context
+                    .select((FliraBloc bloc) => bloc.state.atlassianUser),
+                onChanged: (value) => context.read<FliraBloc>().add(
+                      UserTextFieldOnChangedEvent(value),
+                    ),
+                decoration: const InputDecoration(
+                  hintText: 'Enter your jira user email',
+                ),
+              ),
+              TextFormField(
+                initialValue: context
+                    .select((FliraBloc bloc) => bloc.state.atlassianApiToken),
+                onChanged: (value) => context.read<FliraBloc>().add(
+                      TokenTextFieldOnChangedEvent(value),
+                    ),
+                decoration: const InputDecoration(
+                  hintText: 'Enter your api token',
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancel'),
                   ),
-                ));
+                  TextButton(
+                    onPressed: () {
+                      displayReportDialog(context);
+                    },
+                    child: const Text('Ok'),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ).whenComplete(() => context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
       } else {
         showDialog(
             barrierDismissible: false,
@@ -73,19 +134,52 @@ class Flira {
             builder: (context) => ReportBugDialog(
                 projects: projects, jiraPlatformApi: jiraPlatformApi));
       }
-    } on Exception catch (e) {
+    } on Exception {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Error'),
-          content: Text('Something went wrong. \n\nError: ${e.toString()}'),
+          content: const Text(
+              'Something went wrong. \n\nPlease check the following data'),
           actions: [
+            TextFormField(
+              initialValue: context
+                  .select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
+              onChanged: (value) => context.read<FliraBloc>().add(
+                    UrlTextFieldOnChangedEvent(value),
+                  ),
+              decoration: const InputDecoration(
+                hintText: 'Enter your jira server name',
+              ),
+            ),
+            TextFormField(
+              initialValue:
+                  context.select((FliraBloc bloc) => bloc.state.atlassianUser),
+              onChanged: (value) => context.read<FliraBloc>().add(
+                    UserTextFieldOnChangedEvent(value),
+                  ),
+              decoration: const InputDecoration(
+                hintText: 'Enter your jira user email',
+              ),
+            ),
+            TextFormField(
+              initialValue: context
+                  .select((FliraBloc bloc) => bloc.state.atlassianApiToken),
+              onChanged: (value) => context.read<FliraBloc>().add(
+                    TokenTextFieldOnChangedEvent(value),
+                  ),
+              decoration: const InputDecoration(
+                hintText: 'Enter your api token',
+              ),
+            ),
             TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
                 child: const Text('Ok'))
           ],
         ),
-      );
+      ).whenComplete(() => displayReportDialog(context));
     }
   }
 
@@ -125,12 +219,20 @@ class FliraWrapper extends StatelessWidget {
       child: Stack(children: [
         app,
         BlocProvider(
-          create: (ctx) => FliraBloc()..add(FliraTriggeredEvent()),
+          create: (ctx) => FliraBloc()
+            ..add(FliraTriggeredEvent())
+            ..add(
+              AddCredentialsEvent(
+                atlassianApiToken,
+                atlassianUser,
+                atlassianUrlPrefix,
+              ),
+            ),
           child: FliraOverlay(
             triggeringMethod: triggeringMethod,
-            atlassianApiToken: atlassianApiToken,
-            atlassianUser: atlassianUser,
-            atlassianUrlPrefix: atlassianUrlPrefix,
+            // atlassianApiToken: atlassianApiToken,
+            // atlassianUser: atlassianUser,
+            // atlassianUrlPrefix: atlassianUrlPrefix,
           ),
         )
       ]),

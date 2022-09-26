@@ -10,21 +10,22 @@ import '../flira.dart';
 class FliraOverlay extends StatelessWidget {
   const FliraOverlay({
     required this.triggeringMethod,
-    required this.atlassianApiToken,
-    required this.atlassianUser,
-    required this.atlassianUrlPrefix,
+    // required this.atlassianApiToken,
+    // required this.atlassianUser,
+    // required this.atlassianUrlPrefix,
     Key? key,
   }) : super(key: key);
   final TriggeringMethod triggeringMethod;
-  final String atlassianApiToken;
-  final String atlassianUser;
-  final String atlassianUrlPrefix;
+  // final String atlassianApiToken;
+  // final String atlassianUser;
+  // final String atlassianUrlPrefix;
   @override
   Widget build(BuildContext context) {
+    final state = context.read<FliraBloc>().state;
     Flira fliraClient = Flira(
-      atlassianApiToken: atlassianApiToken,
-      atlassianUser: atlassianUser,
-      atlassianUrl: atlassianUrlPrefix,
+      atlassianApiToken: state.atlassianApiToken??'',
+      atlassianUser: state.atlassianUser??'',
+      atlassianUrl: state.atlassianUrlPrefix??'',
     );
     if (triggeringMethod == TriggeringMethod.screenshot) {
       final screenshotCallback = ScreenshotCallback(requestPermissions: true);
