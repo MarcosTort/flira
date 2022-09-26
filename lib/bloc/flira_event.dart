@@ -1,7 +1,10 @@
 part of 'flira_bloc.dart';
 
 @immutable
-abstract class FliraEvent {}
+abstract  class FliraEvent {
+    const FliraEvent();
+  List<Object?> get props => [];
+}
 
 class InitialButtonTappedEvent extends FliraEvent {
   @override
@@ -19,14 +22,14 @@ class FliraButtonDraggedEvent extends FliraEvent {
 }
 
 class AddFileEvent extends FliraEvent {
-  AddFileEvent(this.filePickerResult);
+  const AddFileEvent(this.filePickerResult);
   final FilePickerResult? filePickerResult;
 
   @override
   List<Object?> get props => [filePickerResult];
 }
 class AddCredentialsEvent extends FliraEvent {
-  AddCredentialsEvent(this.atlassianApiToken, this.atlassianUser, this.atlassianUrlPrefix);
+  const AddCredentialsEvent(this.atlassianApiToken, this.atlassianUser, this.atlassianUrlPrefix);
   final String? atlassianApiToken;
   final String? atlassianUser;
   final String? atlassianUrlPrefix;
@@ -35,21 +38,21 @@ class AddCredentialsEvent extends FliraEvent {
   List<Object?> get props => [atlassianApiToken, atlassianUser, atlassianUrlPrefix];
 }
 class TokenTextFieldOnChangedEvent extends FliraEvent {
-  TokenTextFieldOnChangedEvent(this.text);
+  const TokenTextFieldOnChangedEvent(this.text);
   final String? text;
 
   @override
   List<Object?> get props => [text];
 }
 class UserTextFieldOnChangedEvent extends FliraEvent {
-  UserTextFieldOnChangedEvent(this.text);
+  const UserTextFieldOnChangedEvent(this.text);
   final String? text;
 
   @override
   List<Object?> get props => [text];
 }
 class UrlTextFieldOnChangedEvent extends FliraEvent {
-  UrlTextFieldOnChangedEvent(this.text);
+  const UrlTextFieldOnChangedEvent(this.text);
   final String? text;
 
   @override

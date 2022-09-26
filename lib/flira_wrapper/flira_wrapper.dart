@@ -38,7 +38,7 @@ class FliraOverlay extends StatelessWidget {
         },
       );
     } else if (triggeringMethod == TriggeringMethod.shaking) {
-      ShakeDetector shakeDetector = ShakeDetector.autoStart(
+      ShakeDetector.autoStart(
         onPhoneShake: () {
           context.read<FliraBloc>().add(FliraTriggeredEvent());
         },
