@@ -15,6 +15,7 @@ class FliraState extends Equatable {
     this.initialButtonWidth,
     this.alignment,
     this.status,
+    this.filePickerResult,
   });
   const FliraState.initial()
       : this(
@@ -31,6 +32,7 @@ class FliraState extends Equatable {
   final double? initialButtonHeight;
   final AlignmentGeometry? alignment;
   final FliraStatus? status;
+  final FilePickerResult? filePickerResult;
 
   FliraState copyWith({
     double? materialAppWidth,
@@ -39,12 +41,14 @@ class FliraState extends Equatable {
     double? initialButtonHeight,
     AlignmentGeometry? alignment,
     FliraStatus? status,
+    FilePickerResult? filePickerResult,
   }) {
     return FliraState(
       materialAppWidth: materialAppWidth ?? this.materialAppWidth,
       materialAppHeight: materialAppHeight ?? this.materialAppHeight,
       initialButtonWidth: initialButtonWidth ?? this.initialButtonWidth,
       initialButtonHeight: initialButtonHeight ?? this.initialButtonHeight,
+      filePickerResult: filePickerResult ?? this.filePickerResult,
       alignment: alignment ?? this.alignment,
       status: status ?? this.status,
     );
@@ -58,5 +62,6 @@ class FliraState extends Equatable {
         initialButtonHeight,
         alignment,
         status,
+        filePickerResult,
       ];
 }

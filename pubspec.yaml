@@ -10,6 +10,7 @@ dependencies:
   atlassian_apis: ^0.8.0
   bloc: ^8.1.0
   equatable: ^2.0.5
+  file_picker: ^5.2.0
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.1

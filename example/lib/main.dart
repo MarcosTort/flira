@@ -27,7 +27,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => flira.FliraWrapper(
-        atlassianApiToken: 'hyN5QCdzSfl0O2H4zE3j6E31',
+        atlassianApiToken: 'FgjuvoP8JJC3ma7B8HUz207C',
         atlassianUrlPrefix: 'marcostrt',
         atlassianUser: 'tort.marcos9@gmail.com',
         triggeringMethod: flira.TriggeringMethod.screenshot,
@@ -71,6 +71,7 @@ class Page1Screen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              
               ElevatedButton(
                 onPressed: () => context.go('/page2'),
                 child: const Text('Go to page 2'),

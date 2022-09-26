@@ -125,7 +125,7 @@ class FliraWrapper extends StatelessWidget {
       child: Stack(children: [
         app,
         BlocProvider(
-          create: (ctx) => FliraBloc(),
+          create: (ctx) => FliraBloc()..add(FliraTriggeredEvent()),
           child: FliraOverlay(
             triggeringMethod: triggeringMethod,
             atlassianApiToken: atlassianApiToken,

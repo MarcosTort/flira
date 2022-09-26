@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:equatable/equatable.dart';
 part 'flira_event.dart';
@@ -9,6 +10,7 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     on<InitialButtonTappedEvent>(_onInitialButtonTappedEvent);
     on<FliraTriggeredEvent>(_onFliraTriggeredEvent);
     on<FliraButtonDraggedEvent>(_onFliraButtonDraggedEvent);
+    on<AddFileEvent>(_onAddFileEvent);
   }
   Future<void> _onInitialButtonTappedEvent(
       InitialButtonTappedEvent event, Emitter<FliraState> emit) async {
@@ -42,6 +44,11 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
       initialButtonHeight: 0,
       materialAppHeight: 0,
       materialAppWidth: 0,
+    ));
+  }
+  Future<void> _onAddFileEvent(AddFileEvent event, Emitter<FliraState> emit) async {
+    emit(state.copyWith(
+      filePickerResult: event.filePickerResult,
     ));
   }
 }

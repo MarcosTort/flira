@@ -1,8 +1,12 @@
+// ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
-
 import 'widgets/widgets.dart';
+import 'package:file_picker/file_picker.dart';
+// ignore: unused_import
+import 'package:http_parser/http_parser.dart';
+import 'package:http/http.dart';
 
 class ReportBugDialog extends StatefulWidget {
   const ReportBugDialog(
@@ -25,11 +29,11 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
 
   /// Initial IssueType object to be used in the dropdown. This will be updated when the user selects a different issue type
   late _Issue _issue;
-
+  late FilePickerResult? _attachment;
   @override
   void initState() {
     /// Set the initial project and issue
-
+    _attachment = const FilePickerResult([]);
     _project = projects.first;
     _issue = _Issue(
       name: '',
@@ -142,32 +146,48 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           ],
                         ))
                     .toList(),
-                DropdownButton(
-                    borderRadius: BorderRadius.circular(10),
-                    hint: _issue.issueType == 'Bug'
-                        ? const BugMenuItem()
-                        : _issue.issueType == 'Task'
-                            ? const TaskMenuItem()
-                            : const StoryMenuItem(),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Bug',
-                        child: BugMenuItem(),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Task',
-                        child: TaskMenuItem(),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Story',
-                        child: StoryMenuItem(),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _issue = _issue.copyWith(issueType: value.toString());
-                      });
-                    }),
+                Row(
+                  children: [
+                    DropdownButton(
+                        borderRadius: BorderRadius.circular(10),
+                        hint: _issue.issueType == 'Bug'
+                            ? const BugMenuItem()
+                            : _issue.issueType == 'Task'
+                                ? const TaskMenuItem()
+                                : const StoryMenuItem(),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Bug',
+                            child: BugMenuItem(),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Task',
+                            child: TaskMenuItem(),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Story',
+                            child: StoryMenuItem(),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _issue =
+                                _issue.copyWith(issueType: value.toString());
+                          });
+                        }),
+                    IconButton(
+                        onPressed: () async {
+                          final result = await FilePicker.platform.pickFiles(
+                            type: FileType.image,
+                          );
+                          setState(()  {
+                            _attachment = result;
+                          });
+                          
+                        },
+                        icon: const Icon(Icons.attach_file_outlined))
+                  ],
+                ),
                 const SizedBox(
                   height: 24,
                 ),
@@ -182,6 +202,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                     _SubmitTicketButton(
                       jiraPlatformApi: jiraPlatformApi,
                       issue: _issue,
+                      attachments: _attachment,
                     ),
                   ],
                 )
@@ -229,14 +250,17 @@ class _Issue {
 }
 
 class _SubmitTicketButton extends StatelessWidget {
-  const _SubmitTicketButton({
-    Key? key,
-    required this.jiraPlatformApi,
-    required this.issue,
-  }) : super(key: key);
+  const _SubmitTicketButton(
+      {Key? key,
+      required this.jiraPlatformApi,
+      required this.issue,
+      // ignore: unused_element
+      this.attachments})
+      : super(key: key);
 
   final j.JiraPlatformApi jiraPlatformApi;
   final _Issue issue;
+  final FilePickerResult? attachments;
 
   @override
   Widget build(BuildContext context) {
@@ -301,11 +325,9 @@ class _SubmitTicketButton extends StatelessWidget {
 
                   /// If the ticket is created successfully
                   .whenComplete(() {
-                   
                 showDialog(
                   context: context,
                   builder: (context) {
-                    
                     return AlertDialog(
                       title: const Text('Success'),
                       content:
@@ -332,14 +354,14 @@ class _SubmitTicketButton extends StatelessWidget {
                   },
                 );
               });
-                await Future.delayed(const Duration(seconds: 10));
-                var file = j.MultipartFile.fromString(
-                  'test.txt',
-                  'Test attachment',
-                );
-                
-                await jiraPlatformApi.issueAttachments
-                    .addAttachment(issueIdOrKey: send.id??'', file: file );
+
+              final multiPartFile = await MultipartFile.fromPath(
+                  'file', attachments!.paths.first!,
+                  filename: attachments!.names.first);
+
+              final response = await jiraPlatformApi.issueAttachments
+                  .addAttachment(
+                      issueIdOrKey: send.id ?? '', file: multiPartFile);
             },
       color: const Color.fromARGB(255, 8, 0, 255).withOpacity(0.7),
       child: const Text('Send ticket',
@@ -347,46 +369,3 @@ class _SubmitTicketButton extends StatelessWidget {
     );
   }
 }
-
-// void createIssueWithAttachment () async {
-//     var issue = IssueUpdateDetails(
-//       fields: {
-//         'project': {
-//           'key': 'TEST',
-//         },
-//         'summary': 'Test issue',
-//         'attachment': [],
-//         "description": {
-//           "type": "doc",
-//           "version": 1,
-//           "content": [
-//             {
-//               "type": "paragraph",
-//               "content": [
-//                 {
-//                   "type": "text",
-//                   "text": 'Test issue description',
-//                 }
-//               ]
-//             }
-//           ]
-//         },
-//         'issuetype': {
-//           'name': 'Bug',
-//         },
-//       },
-//     );
-
-//     var issueCreated = await jiraPlatformApi.issues.createIssue(body: issue);
-
-//     var attachment = Attachment(
-//       filename: 'test.txt',
-//       mimeType: 'text/plain',
-//       content: base64Encode(utf8.encode('Test attachment')),
-//     );
-
-//     await jiraPlatformApi.issues.addAttachment(
-//       issueIdOrKey: issueCreated.key,
-//       body: attachment,
-//     );
-//   }
