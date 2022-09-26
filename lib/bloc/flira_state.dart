@@ -23,14 +23,13 @@ class FliraState extends Equatable {
   });
   const FliraState.initial()
       : this(
-          materialAppHeight: 0,
-          materialAppWidth: 0,
-          initialButtonHeight: 0,
-          initialButtonWidth: 0,
-          alignment: Alignment.bottomRight,
-          status: FliraStatus.initial,
-          triggeringMethod: TriggeringMethod.none
-        );
+            materialAppHeight: 0,
+            materialAppWidth: 0,
+            initialButtonHeight: 0,
+            initialButtonWidth: 0,
+            alignment: Alignment.bottomRight,
+            status: FliraStatus.initial,
+            triggeringMethod: TriggeringMethod.none);
   final double? materialAppWidth;
   final double? materialAppHeight;
   final double? initialButtonWidth;
@@ -55,8 +54,6 @@ class FliraState extends Equatable {
     String? atlassianApiToken,
     String? atlassianUser,
     String? atlassianUrlPrefix,
-
-
   }) {
     return FliraState(
       materialAppWidth: materialAppWidth ?? this.materialAppWidth,
@@ -70,8 +67,6 @@ class FliraState extends Equatable {
       atlassianApiToken: atlassianApiToken ?? this.atlassianApiToken,
       atlassianUser: atlassianUser ?? this.atlassianUser,
       atlassianUrlPrefix: atlassianUrlPrefix ?? this.atlassianUrlPrefix,
-
-      
     );
   }
 

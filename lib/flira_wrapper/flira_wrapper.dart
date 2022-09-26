@@ -1,4 +1,3 @@
-
 import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,9 +22,9 @@ class FliraOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<FliraBloc>().state;
     Flira fliraClient = Flira(
-      atlassianApiToken: state.atlassianApiToken??'',
-      atlassianUser: state.atlassianUser??'',
-      atlassianUrl: state.atlassianUrlPrefix??'',
+      atlassianApiToken: state.atlassianApiToken ?? '',
+      atlassianUser: state.atlassianUser ?? '',
+      atlassianUrl: state.atlassianUrlPrefix ?? '',
     );
     if (triggeringMethod == TriggeringMethod.screenshot) {
       final screenshotCallback = ScreenshotCallback(requestPermissions: true);
@@ -76,6 +75,7 @@ class FliraOverlay extends StatelessWidget {
     );
   }
 }
+
 class _FloatingButton extends StatelessWidget {
   const _FloatingButton({
     Key? key,

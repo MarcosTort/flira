@@ -67,12 +67,12 @@ class Flira {
           context: context,
           builder: (context) => AlertDialog(
             title: Column(
-              children:  const [
+              children: const [
                 Text(
                   'No projects found. Please check your api token and url',
                 ),
-
-                Text('To get a new token, go to: https://id.atlassian.com/manage-profile/security/api-tokens'),
+                Text(
+                    'To get a new token, go to: https://id.atlassian.com/manage-profile/security/api-tokens'),
               ],
             ),
             actions: [
@@ -109,7 +109,6 @@ class Flira {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -126,7 +125,8 @@ class Flira {
               )
             ],
           ),
-        ).whenComplete(() => context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
+        ).whenComplete(
+            () => context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
       } else {
         showDialog(
             barrierDismissible: false,

@@ -227,7 +227,8 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                         "content": [
                                           {
                                             "type": "text",
-                                            "text": '${_issue.description}',
+                                            "text":
+                                                'Reported using Flira\n\n${_issue.description}',
                                           }
                                         ]
                                       }
@@ -251,9 +252,8 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                         actions: [
                                           TextButton(
                                               onPressed: () {
-                                                context
-                                                .read<FliraBloc>()
-                                                .add(FliraButtonDraggedEvent());
+                                                context.read<FliraBloc>().add(
+                                                    FliraButtonDraggedEvent());
                                                 Navigator.pop(context);
                                               },
                                               child: const Text('Ok'))
