@@ -1,4 +1,3 @@
-// ignore_for_file: depend_on_referenced_packages
 
 import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +5,6 @@ import 'package:atlassian_apis/jira_platform.dart' as j;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'widgets/widgets.dart';
 import 'package:file_picker/file_picker.dart';
-// ignore: unused_import
-import 'package:http_parser/http_parser.dart';
-import 'package:http/http.dart';
 
 class ReportBugDialog extends StatefulWidget {
   const ReportBugDialog(
@@ -298,7 +294,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                               });
 
                               final multiPartFile =
-                                  await MultipartFile.fromPath(
+                                  await j.MultipartFile.fromPath(
                                       'file', _attachment!.paths.first!,
                                       filename: _attachment!.names.first);
 
