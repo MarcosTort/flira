@@ -2,7 +2,7 @@
 
 Use Flira to create Jira issues from your mobile flutter app.
 
-[![ezgif.com-gif-maker87824c9a4266f65e.gif](https://s5.gifyu.com/images/ezgif.com-gif-maker87824c9a4266f65e.gif)](https://gifyu.com/image/S3sLN)
+[![ezgif.com-gif-maker-1c8c10af26f6aee90.gif](https://s4.gifyu.com/images/ezgif.com-gif-maker-1c8c10af26f6aee90.gif)](https://gifyu.com/image/S34VA)
 
 ### Usage
 
@@ -35,4 +35,4 @@ FliraWrapper(
       );
 ```
 ### Code example repository
-[Code example](https://github.com/MarcosTort/flira) stable branch
+[Code example](https://github.com/MarcosTort/flira) feature/attach_image_to_issue (Current release)

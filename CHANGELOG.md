@@ -17,3 +17,11 @@
 * Implemented a small floating button to display the dialog
 * Created a wrapper to make it compatible with MaterialApp.router.
 * Started using Bloc for the state management.
+
+## [0.2.0] 26 September 2022
+
+* Added attachment field for issue creating
+* Settings dialog to change api token, user name or url prefix
+* Improved state management
+* Bugfixing
+* This release was made from feature/attach_image_to_issue branch
