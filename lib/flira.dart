@@ -136,50 +136,69 @@ class Flira {
       }
     } on Exception {
       showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text(
-              'Something went wrong. \n\nPlease check the following data'),
-          actions: [
-            TextFormField(
-              initialValue: context
-                  .select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
-              onChanged: (value) => context.read<FliraBloc>().add(
-                    UrlTextFieldOnChangedEvent(value),
-                  ),
-              decoration: const InputDecoration(
-                hintText: 'Enter your jira server name',
-              ),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Column(
+              children: const [
+                Text(
+                  'No projects found. Please check your api token and url',
+                ),
+                Text(
+                    'To get a new token, go to: https://id.atlassian.com/manage-profile/security/api-tokens'),
+              ],
             ),
-            TextFormField(
-              initialValue:
-                  context.select((FliraBloc bloc) => bloc.state.atlassianUser),
-              onChanged: (value) => context.read<FliraBloc>().add(
-                    UserTextFieldOnChangedEvent(value),
-                  ),
-              decoration: const InputDecoration(
-                hintText: 'Enter your jira user email',
+            actions: [
+              TextFormField(
+                initialValue: context
+                    .select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
+                onChanged: (value) => context.read<FliraBloc>().add(
+                      UrlTextFieldOnChangedEvent(value),
+                    ),
+                decoration: const InputDecoration(
+                  hintText: 'Enter your jira server name',
+                ),
               ),
-            ),
-            TextFormField(
-              initialValue: context
-                  .select((FliraBloc bloc) => bloc.state.atlassianApiToken),
-              onChanged: (value) => context.read<FliraBloc>().add(
-                    TokenTextFieldOnChangedEvent(value),
-                  ),
-              decoration: const InputDecoration(
-                hintText: 'Enter your api token',
+              TextFormField(
+                initialValue: context
+                    .select((FliraBloc bloc) => bloc.state.atlassianUser),
+                onChanged: (value) => context.read<FliraBloc>().add(
+                      UserTextFieldOnChangedEvent(value),
+                    ),
+                decoration: const InputDecoration(
+                  hintText: 'Enter your jira user email',
+                ),
               ),
-            ),
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Ok'))
-          ],
-        ),
-      ).whenComplete(() => displayReportDialog(context));
+              TextFormField(
+                initialValue: context
+                    .select((FliraBloc bloc) => bloc.state.atlassianApiToken),
+                onChanged: (value) => context.read<FliraBloc>().add(
+                      TokenTextFieldOnChangedEvent(value),
+                    ),
+                decoration: const InputDecoration(
+                  hintText: 'Enter your api token',
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      displayReportDialog(context);
+                    },
+                    child: const Text('Ok'),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ).whenComplete(
+            () => context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
     }
   }
 
