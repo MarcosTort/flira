@@ -36,4 +36,6 @@
 * Improved media file attaching
 * UI
 * Removed credentials parameters from FliraWrapper class
+### [0.3.1] 01 October 2022
 
+* Missing changes
