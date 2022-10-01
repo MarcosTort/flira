@@ -1,5 +1,4 @@
 import 'package:flira/bloc/flira_bloc.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -191,7 +190,9 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           },
                           icon: const Icon(Icons.attach_file_outlined),
                         ),
-                        if((_attachment?? const FilePickerResult([])).files.isNotEmpty)
+                        if ((_attachment ?? const FilePickerResult([]))
+                            .files
+                            .isNotEmpty)
                           Container(
                             height: 20,
                             width: 20,
@@ -201,14 +202,16 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                             ),
                             child: Center(
                               child: Text(
-                                (_attachment?? const FilePickerResult([])).files.length.toString(),
+                                (_attachment ?? const FilePickerResult([]))
+                                    .files
+                                    .length
+                                    .toString(),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
                                 ),
                               ),
                             ),
-                          
                           )
                       ],
                     )

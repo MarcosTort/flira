@@ -83,19 +83,18 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
 
   Future<void> _onAddCredentialsEvent(
       AddCredentialsEvent event, Emitter<FliraState> emit) async {
-    
-    await storage.write(
-        key: 'atlassianApiToken', value: state.atlassianApiToken);
-    await storage.write(key: 'atlassianUser', value: state.atlassianUser);
-    await storage.write(
-        key: 'atlassianUrlPrefix', value: state.atlassianUrlPrefix);
-
+    Future.wait([
+      storage.write(key: 'atlassianApiToken', value: state.atlassianApiToken),
+      storage.write(key: 'atlassianUser', value: state.atlassianUser),
+      storage.write(key: 'atlassianUrlPrefix', value: state.atlassianUrlPrefix),
+    ]);
     emit(state.copyWith(
       atlassianApiToken: state.atlassianApiToken,
       atlassianUser: state.atlassianUser,
       atlassianUrlPrefix: state.atlassianUrlPrefix,
     ));
   }
+
   Future<void> _onLoadCredentialsFromStorageEvent(
       LoadCredentialsFromStorageEvent event, Emitter<FliraState> emit) async {
     final atlassianApiToken = await storage.read(key: 'atlassianApiToken');

@@ -21,18 +21,12 @@ class FliraOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.read<FliraBloc>().state;
-    final reportDialogOpen =
-        context.select((FliraBloc value) => value.state.reportDialogOpen);
+    final reportDialogOpen = state.reportDialogOpen;
     final canTriggerDialog = !reportDialogOpen;
-    Flira fliraClient = Flira(
-      atlassianApiToken: state.atlassianApiToken ?? '',
-      atlassianUser: state.atlassianUser ?? '',
-      atlassianUrl: state.atlassianUrlPrefix ?? '',
-    );
+    Flira fliraClient = Flira();
     if (triggeringMethod == TriggeringMethod.screenshot) {
       final screenshotCallback = ScreenshotCallback();
       screenshotCallback.initialize();
-      screenshotCallback.checkPermission();
       screenshotCallback.addListener(
         () {
           if (canTriggerDialog) {

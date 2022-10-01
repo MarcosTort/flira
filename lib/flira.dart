@@ -9,16 +9,7 @@ import 'report_dialog/report_dialog.dart';
 
 /// This is the main class
 class Flira {
-  Flira({
-    /// The user's email
-    required this.atlassianUser,
-
-    /// The user's token generated in the atlassian account
-    required this.atlassianApiToken,
-
-    /// The jira url of the organization
-    required this.atlassianUrl,
-  });
+  Flira();
 
   /// initializing triggering methods
 
@@ -76,7 +67,9 @@ class Flira {
                       color: Colors.transparent,
                       child: IconButton(
                           onPressed: () {
-                            settingsDialog(context, message: 'Settings\n \nTo get a new token go to: \n');
+                            settingsDialog(context,
+                                message:
+                                    'Settings\n \nTo get a new token go to: \n');
                           },
                           icon: const Icon(
                             Icons.settings,
@@ -100,7 +93,7 @@ class Flira {
       context: context,
       builder: (context) => AlertDialog(
         title: Column(
-          children:  [
+          children: [
             Text(
               message,
             ),
@@ -151,12 +144,12 @@ class Flira {
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () async{
+                onPressed: () async {
                   context.read<FliraBloc>().add(
                         const AddCredentialsEvent(),
                       );
-                  await Future.delayed(const Duration(milliseconds: 200));
-                  Navigator.pop(context);
+                  await Future.delayed(const Duration(milliseconds: 200))
+                      .whenComplete(() => Navigator.pop(context));
                 },
                 child: const Text('Ok'),
               ),
@@ -166,10 +159,6 @@ class Flira {
       ),
     );
   }
-
-  final String atlassianUser;
-  final String atlassianApiToken;
-  final String atlassianUrl;
 }
 
 class FliraWrapper extends StatelessWidget {

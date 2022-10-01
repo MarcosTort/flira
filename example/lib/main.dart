@@ -15,9 +15,9 @@ import 'package:go_router/go_router.dart';
 // The onPress callbacks use context.go() to navigate to another page. This is
 // equivalent to entering url to the browser url bar directly.
 
-void main() { 
-  runApp(App());}
-
+void main() {
+  runApp(App());
+}
 
 /// The main app.
 class App extends StatelessWidget {

@@ -20,7 +20,7 @@ class FliraState extends Equatable {
     this.atlassianUser,
     this.atlassianUrlPrefix,
     required this.triggeringMethod,
-     this.reportDialogOpen = false,
+    this.reportDialogOpen = false,
   });
   const FliraState.initial()
       : this(

@@ -31,11 +31,9 @@ class AddFileEvent extends FliraEvent {
 
 class AddCredentialsEvent extends FliraEvent {
   const AddCredentialsEvent();
- 
 
   @override
-  List<Object?> get props =>
-      [];
+  List<Object?> get props => [];
 }
 
 class TokenTextFieldOnChangedEvent extends FliraEvent {
@@ -61,6 +59,7 @@ class UrlTextFieldOnChangedEvent extends FliraEvent {
   @override
   List<Object?> get props => [text];
 }
+
 class LoadCredentialsFromStorageEvent extends FliraEvent {
   @override
   List<Object?> get props => [];

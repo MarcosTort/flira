@@ -18,21 +18,19 @@ The flow is:
 - Trigger Flira.
 - Tap the small floating button.
 - Enter the data and send the ticket.
-- To dismiss the floating button, double tap on it.
+- To dismiss the floating button, drag it down.
 ```
 FliraWrapper(
-        atlassianApiToken: 'TxS1UBrLD6f8Rjsbk6brA81D',
-        atlassianUrlPrefix: 'marcostrt',
-        atlassianUser: 'tort.marcos9@gmail.com',
         triggeringMethod: TriggeringMethod.shaking,
         context: context,
         app: MaterialApp.router(
-          routeInformationProvider: _router.routeInformationProvider,
-          routeInformationParser: _router.routeInformationParser,
-          routerDelegate: _router.routerDelegate,
-          title: title,
+         .
+         .
+         .
         ),
       );
 ```
+
+FliraWrapper can be applied to <b>MaterialApp</b> and <b>MaterialApp.router()</b> as well.
 ### Code example repository
 [Code example](https://github.com/MarcosTort/flira) feature/attach_image_to_issue (Current release)
