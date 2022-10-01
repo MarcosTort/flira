@@ -1,5 +1,5 @@
-
 import 'package:flira/bloc/flira_bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' as j;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,8 +63,13 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                 const SizedBox(
                   height: 16,
                 ),
-                Text('Create Issue',
-                    style: Theme.of(context).textTheme.headline6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Create Issue',
+                        style: Theme.of(context).textTheme.headline6),
+                  ],
+                ),
                 const SizedBox(
                   height: 36,
                 ),
@@ -173,16 +178,40 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                 _issue.copyWith(issueType: value.toString());
                           });
                         }),
-                    IconButton(
-                        onPressed: () async {
-                          final result = await FilePicker.platform.pickFiles(
-                            type: FileType.media,
-                          );
-                          setState(() {
-                            _attachment = result;
-                          });
-                        },
-                        icon: const Icon(Icons.attach_file_outlined))
+                    Stack(
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles(
+                              type: FileType.media,
+                            );
+                            setState(() {
+                              _attachment = result;
+                            });
+                          },
+                          icon: const Icon(Icons.attach_file_outlined),
+                        ),
+                        if((_attachment?? const FilePickerResult([])).files.isNotEmpty)
+                          Container(
+                            height: 20,
+                            width: 20,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                (_attachment?? const FilePickerResult([])).files.length.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          
+                          )
+                      ],
+                    )
                   ],
                 ),
                 const SizedBox(
