@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:screenshot_callback/screenshot_callback.dart';
 import 'package:shake/shake.dart';
 import '../flira.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FliraOverlay extends StatelessWidget {
   const FliraOverlay({
@@ -26,7 +27,8 @@ class FliraOverlay extends StatelessWidget {
     Flira fliraClient = Flira();
     if (triggeringMethod == TriggeringMethod.screenshot) {
       final screenshotCallback = ScreenshotCallback();
-      screenshotCallback.initialize();
+      
+      screenshotCallback.initialize().whenComplete(() => checkPermissions());
       screenshotCallback.addListener(
         () {
           if (canTriggerDialog) {
@@ -142,5 +144,12 @@ class _FloatingButton extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+Future<void> checkPermissions() async {
+  final status = await Permission.storage.status;
+  if (status.isDenied) {
+    Permission.storage.request();
   }
 }

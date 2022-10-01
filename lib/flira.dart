@@ -166,9 +166,6 @@ class FliraWrapper extends StatelessWidget {
     super.key,
     required this.app,
     required this.context,
-    required this.atlassianApiToken,
-    required this.atlassianUser,
-    required this.atlassianUrlPrefix,
     this.triggeringMethod = TriggeringMethod.none,
   });
   final MaterialApp app;
@@ -177,14 +174,6 @@ class FliraWrapper extends StatelessWidget {
   /// Triggering method for the client
   final TriggeringMethod triggeringMethod;
 
-  /// Atlassian API token
-  final String atlassianApiToken;
-
-  /// Atlassian user email
-  final String atlassianUser;
-
-  /// Atlassian url prefix of your jira cloud. Like https://yourcompany.atlassian.net (yourcompany)
-  final String atlassianUrlPrefix;
   @override
   Widget build(BuildContext context) {
     return Directionality(

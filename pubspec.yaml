@@ -15,6 +15,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.1
   flutter_secure_storage: ^6.0.0
+  permission_handler: ^10.0.2
   screenshot_callback: ^2.0.3
   shake: ^2.1.0  
 dev_dependencies:
