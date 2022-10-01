@@ -30,15 +30,12 @@ class AddFileEvent extends FliraEvent {
 }
 
 class AddCredentialsEvent extends FliraEvent {
-  const AddCredentialsEvent(
-      this.atlassianApiToken, this.atlassianUser, this.atlassianUrlPrefix);
-  final String? atlassianApiToken;
-  final String? atlassianUser;
-  final String? atlassianUrlPrefix;
+  const AddCredentialsEvent();
+ 
 
   @override
   List<Object?> get props =>
-      [atlassianApiToken, atlassianUser, atlassianUrlPrefix];
+      [];
 }
 
 class TokenTextFieldOnChangedEvent extends FliraEvent {
@@ -63,4 +60,8 @@ class UrlTextFieldOnChangedEvent extends FliraEvent {
 
   @override
   List<Object?> get props => [text];
+}
+class LoadCredentialsFromStorageEvent extends FliraEvent {
+  @override
+  List<Object?> get props => [];
 }

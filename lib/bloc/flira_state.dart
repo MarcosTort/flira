@@ -20,6 +20,7 @@ class FliraState extends Equatable {
     this.atlassianUser,
     this.atlassianUrlPrefix,
     required this.triggeringMethod,
+     this.reportDialogOpen = false,
   });
   const FliraState.initial()
       : this(
@@ -41,6 +42,7 @@ class FliraState extends Equatable {
   final String? atlassianApiToken;
   final String? atlassianUser;
   final String? atlassianUrlPrefix;
+  final bool reportDialogOpen;
 
   FliraState copyWith({
     double? materialAppWidth,
@@ -54,6 +56,7 @@ class FliraState extends Equatable {
     String? atlassianApiToken,
     String? atlassianUser,
     String? atlassianUrlPrefix,
+    bool? reportDialogOpen,
   }) {
     return FliraState(
       materialAppWidth: materialAppWidth ?? this.materialAppWidth,
@@ -67,6 +70,7 @@ class FliraState extends Equatable {
       atlassianApiToken: atlassianApiToken ?? this.atlassianApiToken,
       atlassianUser: atlassianUser ?? this.atlassianUser,
       atlassianUrlPrefix: atlassianUrlPrefix ?? this.atlassianUrlPrefix,
+      reportDialogOpen: reportDialogOpen ?? this.reportDialogOpen,
     );
   }
 
@@ -83,5 +87,6 @@ class FliraState extends Equatable {
         atlassianApiToken,
         atlassianUser,
         atlassianUrlPrefix,
+        reportDialogOpen,
       ];
 }

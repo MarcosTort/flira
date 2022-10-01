@@ -25,3 +25,7 @@
 * Improved state management
 * Bugfixing
 * This release was made from feature/attach_image_to_issue branch
+
+## [0.2.1] 26 September 2022
+
+* Bugfix

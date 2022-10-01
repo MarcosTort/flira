@@ -176,7 +176,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                     IconButton(
                         onPressed: () async {
                           final result = await FilePicker.platform.pickFiles(
-                            type: FileType.image,
+                            type: FileType.media,
                           );
                           setState(() {
                             _attachment = result;

@@ -21,25 +21,31 @@ class FliraOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.read<FliraBloc>().state;
+    final reportDialogOpen =
+        context.select((FliraBloc value) => value.state.reportDialogOpen);
+    final canTriggerDialog = !reportDialogOpen;
     Flira fliraClient = Flira(
       atlassianApiToken: state.atlassianApiToken ?? '',
       atlassianUser: state.atlassianUser ?? '',
       atlassianUrl: state.atlassianUrlPrefix ?? '',
     );
     if (triggeringMethod == TriggeringMethod.screenshot) {
-      final screenshotCallback = ScreenshotCallback(requestPermissions: true);
+      final screenshotCallback = ScreenshotCallback();
       screenshotCallback.initialize();
       screenshotCallback.checkPermission();
-
       screenshotCallback.addListener(
         () {
-          context.read<FliraBloc>().add(FliraTriggeredEvent());
+          if (canTriggerDialog) {
+            context.read<FliraBloc>().add(FliraTriggeredEvent());
+          }
         },
       );
     } else if (triggeringMethod == TriggeringMethod.shaking) {
       ShakeDetector.autoStart(
         onPhoneShake: () {
-          context.read<FliraBloc>().add(FliraTriggeredEvent());
+          if (canTriggerDialog) {
+            context.read<FliraBloc>().add(FliraTriggeredEvent());
+          }
         },
       );
     }
@@ -94,7 +100,7 @@ class _FloatingButton extends StatelessWidget {
             duration: const Duration(milliseconds: 450),
             alignment: Alignment.center,
             child: GestureDetector(
-              onDoubleTap: () {
+              onVerticalDragStart: (details) {
                 context.read<FliraBloc>().add(FliraButtonDraggedEvent());
               },
               onTap: () async {
