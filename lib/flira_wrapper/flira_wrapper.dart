@@ -10,15 +10,10 @@ import 'package:permission_handler/permission_handler.dart';
 class FliraOverlay extends StatelessWidget {
   const FliraOverlay({
     required this.triggeringMethod,
-    // required this.atlassianApiToken,
-    // required this.atlassianUser,
-    // required this.atlassianUrlPrefix,
     Key? key,
   }) : super(key: key);
   final TriggeringMethod triggeringMethod;
-  // final String atlassianApiToken;
-  // final String atlassianUser;
-  // final String atlassianUrlPrefix;
+
   @override
   Widget build(BuildContext context) {
     final state = context.read<FliraBloc>().state;
@@ -27,7 +22,7 @@ class FliraOverlay extends StatelessWidget {
     Flira fliraClient = Flira();
     if (triggeringMethod == TriggeringMethod.screenshot) {
       final screenshotCallback = ScreenshotCallback();
-      
+
       screenshotCallback.initialize().whenComplete(() => checkPermissions());
       screenshotCallback.addListener(
         () {
@@ -101,9 +96,8 @@ class _FloatingButton extends StatelessWidget {
               },
               onTap: () async {
                 ctx.read<FliraBloc>().add(InitialButtonTappedEvent());
-                await fliraClient
-                    .displayReportDialog(ctx)
-                    .whenComplete(() => null);
+                await fliraClient.displayReportDialog(ctx).whenComplete(() =>
+                    context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
               },
               child: Material(
                 shape: const CircleBorder(),
