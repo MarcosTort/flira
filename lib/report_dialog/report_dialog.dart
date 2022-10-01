@@ -224,7 +224,8 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     MaterialButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          context.read<FliraBloc>().add(FliraButtonDraggedEvent());
                           Navigator.pop(context);
                         },
                         child: const Text('Cancel')),

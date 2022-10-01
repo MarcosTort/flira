@@ -43,6 +43,7 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
       materialAppHeight: 1000,
       materialAppWidth: 1000,
       status: FliraStatus.loading,
+      reportDialogOpen: true,
     ));
     await Future.delayed(const Duration(seconds: 1));
     emit(state.copyWith(
@@ -59,7 +60,6 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
       initialButtonHeight: 100,
       materialAppHeight: 100,
       materialAppWidth: 100,
-      reportDialogOpen: true,
     ));
   }
 

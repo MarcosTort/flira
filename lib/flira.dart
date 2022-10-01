@@ -68,6 +68,7 @@ class Flira {
                       child: IconButton(
                           onPressed: () {
                             settingsDialog(context,
+                                fromSettings: true,
                                 message:
                                     'Settings\n \nTo get a new token go to: \n');
                           },
@@ -81,13 +82,13 @@ class Flira {
                 ));
       }
     } on Exception {
-      settingsDialog(context).whenComplete(
-          () => context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
+      settingsDialog(context);
     }
   }
 
   Future<dynamic> settingsDialog(BuildContext context,
-      {String message =
+      {bool fromSettings = false,
+      String message =
           'No projects found. Please check your api token and url. To get a new token, go to:\n'}) {
     return showDialog(
       context: context,
@@ -139,6 +140,9 @@ class Flira {
             children: [
               TextButton(
                 onPressed: () {
+                  if (!fromSettings) {
+                    context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+                  }
                   Navigator.pop(context);
                 },
                 child: const Text('Cancel'),
@@ -149,7 +153,12 @@ class Flira {
                         const AddCredentialsEvent(),
                       );
                   await Future.delayed(const Duration(milliseconds: 200))
-                      .whenComplete(() => Navigator.pop(context));
+                      .whenComplete(() {
+                    Navigator.pop(context);
+                    if (!fromSettings) {
+                      context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+                    }
+                  });
                 },
                 child: const Text('Ok'),
               ),

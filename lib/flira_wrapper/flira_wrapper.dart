@@ -17,7 +17,7 @@ class FliraOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.read<FliraBloc>().state;
-    final reportDialogOpen = state.reportDialogOpen;
+    final reportDialogOpen = context.select((FliraBloc value) => value.state.reportDialogOpen);
     final canTriggerDialog = !reportDialogOpen;
     Flira fliraClient = Flira();
     if (triggeringMethod == TriggeringMethod.screenshot) {
@@ -96,8 +96,7 @@ class _FloatingButton extends StatelessWidget {
               },
               onTap: () async {
                 ctx.read<FliraBloc>().add(InitialButtonTappedEvent());
-                await fliraClient.displayReportDialog(ctx).whenComplete(() =>
-                    context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
+                fliraClient.displayReportDialog(ctx);
               },
               child: Material(
                 shape: const CircleBorder(),
