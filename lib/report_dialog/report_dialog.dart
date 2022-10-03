@@ -225,9 +225,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                   children: [
                     MaterialButton(
                         onPressed: () async {
-                          context
-                              .read<FliraBloc>()
-                              .add(FliraButtonDraggedEvent());
+                          
                           Navigator.pop(context);
                         },
                         child: const Text('Cancel')),
@@ -305,6 +303,9 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                       actions: [
                                         TextButton(
                                           onPressed: () {
+                                            setState(() {
+                                _attachment = null;
+                              });
                                             Navigator.pop(context);
                                           },
                                           child: const Text('Yes'),
@@ -333,13 +334,13 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                       'file', _attachment!.paths.first!,
                                       filename: _attachment!.names.first);
 
-                              await jiraPlatformApi.issueAttachments
+                               jiraPlatformApi.issueAttachments
                                   .addAttachment(
                                       issueIdOrKey: send.id ?? '',
                                       file: multiPartFile);
-                              setState(() {
-                                _attachment = null;
-                              });
+                              // setState(() {
+                              //   _attachment = null;
+                              // });
                             },
                       color:
                           const Color.fromARGB(255, 8, 0, 255).withOpacity(0.7),

@@ -56,30 +56,39 @@ class Flira {
       if (projects.isEmpty) {
         throw Exception;
       } else {
-        showDialog(
+        Future.delayed(
+          const Duration(milliseconds: 500),
+          () => showDialog(
             barrierDismissible: false,
             context: context,
             builder: (context) => Stack(
-                  children: [
-                    ReportBugDialog(
-                        projects: projects, jiraPlatformApi: jiraPlatformApi),
-                    Material(
-                      color: Colors.transparent,
-                      child: IconButton(
-                          onPressed: () {
-                            settingsDialog(context,
-                                fromSettings: true,
-                                message:
-                                    'Settings\n \nTo get a new token go to: \n');
-                          },
-                          icon: const Icon(
-                            Icons.settings,
-                            color: Colors.white,
-                            size: 40,
-                          )),
-                    )
-                  ],
-                ));
+              children: [
+                ReportBugDialog(
+                    projects: projects, jiraPlatformApi: jiraPlatformApi),
+                Material(
+                  color: Colors.transparent,
+                  child: IconButton(
+                      onPressed: () {
+                        settingsDialog(context,
+                            fromSettings: true,
+                            message:
+                                'Settings\n \nTo get a new token go to: \n');
+                      },
+                      icon: const Icon(
+                        Icons.settings,
+                        color: Colors.white,
+                        size: 40,
+                      )),
+                )
+              ],
+            ),
+          ).whenComplete(() async => Future.delayed(
+                const Duration(microseconds: 100),
+                () => context.read<FliraBloc>().add(
+                      FliraButtonDraggedEvent(),
+                    ),
+              )),
+        );
       }
     } on Exception {
       settingsDialog(context);

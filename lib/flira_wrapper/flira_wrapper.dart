@@ -64,7 +64,7 @@ class FliraOverlay extends StatelessWidget {
               child: MediaQuery(
                 data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
                 child: Material(
-                  color: Colors.transparent,
+                  color: const Color.fromARGB(255, 23, 8, 8),
                   child: Navigator(
                     onGenerateRoute: (settings) => MaterialPageRoute(
                       builder: (context) => _FloatingButton(
