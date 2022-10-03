@@ -40,6 +40,8 @@
 
 * Missing changes
 
-### [0.3.2] 01 October 2022
+### [0.3.20] 01 October 2022
 
+* Bugfix
+### [0.3.21] 01 October 2022
 * Bugfix

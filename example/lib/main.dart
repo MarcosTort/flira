@@ -29,7 +29,6 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => flira.FliraWrapper(
-        
         triggeringMethod: flira.TriggeringMethod.screenshot,
         context: context,
         app: MaterialApp.router(

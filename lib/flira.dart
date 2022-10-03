@@ -91,6 +91,7 @@ class Flira {
       String message =
           'No projects found. Please check your api token and url. To get a new token, go to:\n'}) {
     return showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(
         title: Column(

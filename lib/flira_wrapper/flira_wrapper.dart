@@ -16,7 +16,8 @@ class FliraOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reportDialogOpen = context.select((FliraBloc value) => value.state.reportDialogOpen);
+    final reportDialogOpen =
+        context.select((FliraBloc value) => value.state.reportDialogOpen);
     final canTriggerDialog = !reportDialogOpen;
     Flira fliraClient = Flira();
     if (triggeringMethod == TriggeringMethod.screenshot) {

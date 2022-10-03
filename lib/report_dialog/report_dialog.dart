@@ -225,7 +225,9 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                   children: [
                     MaterialButton(
                         onPressed: () async {
-                          context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+                          context
+                              .read<FliraBloc>()
+                              .add(FliraButtonDraggedEvent());
                           Navigator.pop(context);
                         },
                         child: const Text('Cancel')),
