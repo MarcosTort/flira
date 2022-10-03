@@ -55,13 +55,22 @@ class FliraOverlay extends StatelessWidget {
             ),
             width: width,
             height: height,
-            child: MaterialApp(
-              debugShowCheckedModeBanner: false,
-              color: Colors.black,
-              builder: (ctx, child) => Navigator(
-                onGenerateRoute: (settings) => MaterialPageRoute(
-                  builder: (context) => _FloatingButton(
-                    fliraClient: fliraClient,
+            child: Localizations(
+              delegates: const [
+                DefaultMaterialLocalizations.delegate,
+                DefaultWidgetsLocalizations.delegate,
+              ],
+              locale: const Locale('en', 'US'),
+              child: MediaQuery(
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Navigator(
+                    onGenerateRoute: (settings) => MaterialPageRoute(
+                      builder: (context) => _FloatingButton(
+                        fliraClient: fliraClient,
+                      ),
+                    ),
                   ),
                 ),
               ),
