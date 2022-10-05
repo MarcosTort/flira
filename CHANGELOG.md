@@ -45,3 +45,5 @@
 * Bugfix
 ### [0.3.21] 01 October 2022
 * Bugfix
+### [0.3.22] 03 October 2022
+* Bugfix

@@ -136,6 +136,7 @@ class Flira {
             ),
           ),
           TextFormField(
+            obscureText: true,
             initialValue: context
                 .select((FliraBloc bloc) => bloc.state.atlassianApiToken),
             onChanged: (value) => context.read<FliraBloc>().add(
