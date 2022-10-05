@@ -2,32 +2,35 @@
 
 Use Flira to create Jira issues from your mobile flutter app.
 
-[![GIF-220910_234824.gif](https://s4.gifyu.com/images/GIF-220910_234824.gif)](https://gifyu.com/image/SwtLA)
+[![ezgif.com-gif-maker-1c8c10af26f6aee90.gif](https://s4.gifyu.com/images/ezgif.com-gif-maker-1c8c10af26f6aee90.gif)](https://gifyu.com/image/S34VA)
 
 ### Usage
 
 
-The <b>Flira report dialog </b> is built to be placed inside the home parameter of our <b>MaterialApp</b>.
+The <b>Flira report dialog </b> is built to wrap our <b>MaterialApp</b>.
 
-Once we initialized the Flira client, we will be able to call the report dialog using three methods: 
+Once we wrapped our MaterialApp, we will be able to call the report dialog using three methods: 
 - shaking the screen
-- taking a screenshot or 
+- taking a screenshot
 - calling to a void function from Flira package.
 
+The flow is:
+- Trigger Flira.
+- Tap the small floating button.
+- Enter the data and send the ticket.
+- To dismiss the floating button, drag it down.
 ```
-Flira fliraClient = Flira(
-        // get this from https://id.atlassian.com/manage-profile/security/api-tokens
-        atlassianApiToken: 'myyQMo9cBvfUmWEgrwQUCA84',
-        // atlassian url prefix
-        atlassianUrl: 'marcostrt',
-        // your email
-        atlassianUser: 'tort.marcos9@gmail.com');
-    fliraClient.init(
-      
-      context: context,
-      // Here you can choose how to trigger the Flira client
-      method: TriggeringMethod.screenshot,
-    );
+FliraWrapper(
+        triggeringMethod: TriggeringMethod.shaking,
+        context: context,
+        app: MaterialApp.router(
+         .
+         .
+         .
+        ),
+      );
 ```
+
+FliraWrapper can be applied to <b>MaterialApp</b> and <b>MaterialApp.router()</b> as well.
 ### Code example repository
-[Code example](https://github.com/MarcosTort/flira)
+[Code example](https://github.com/MarcosTort/flira) feature/attach_image_to_issue (Current release)
