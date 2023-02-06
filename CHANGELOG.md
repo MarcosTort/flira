@@ -47,3 +47,5 @@
 * Bugfix
 ### [0.3.22] 03 October 2022
 * Bugfix
+### [0.3.23] 06 February 2023
+* Updated dependencies
