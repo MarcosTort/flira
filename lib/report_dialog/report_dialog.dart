@@ -66,13 +66,13 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Create Issue',
-                        style: Theme.of(context).textTheme.headline6),
+                        style: Theme.of(context).textTheme.titleLarge),
                   ],
                 ),
                 const SizedBox(
                   height: 36,
                 ),
-                Text('Project', style: Theme.of(context).textTheme.subtitle1),
+                Text('Project', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(
                   height: 5,
                 ),

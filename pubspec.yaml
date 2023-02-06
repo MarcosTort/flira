@@ -7,20 +7,19 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  atlassian_apis: ^0.8.0
-  bloc: ^8.1.0
+  atlassian_apis: ^0.11.0
   equatable: ^2.0.5
-  file_picker: ^5.2.0
+  file_picker: ^5.2.5
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.1
-  flutter_secure_storage: ^6.0.0
-  permission_handler: ^10.0.2
+  flutter_secure_storage: ^7.0.1
+  permission_handler: ^10.2.0
   screenshot_callback: ^2.0.3
-  shake: ^2.1.0  
+  shake: ^2.2.0  
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.1
   
 flutter:
