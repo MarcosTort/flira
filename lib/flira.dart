@@ -50,9 +50,13 @@ class Flira {
           await _getApiClient(url ?? '', user ?? '', apiToken ?? '');
 
       final jiraPlatformApi = await _getJiraPlatformApi(apiClient);
-
       /// Here we get the projects of the current atlassianUrl
       final projects = await jiraPlatformApi.projects.getAllProjects();
+      // get all the issues in a project
+      jiraPlatformApi.issueSearch.searchForIssuesUsingJql(
+          jql: 'project = ${projects.first.key}');
+
+          
       if (projects.isEmpty) {
         throw Exception;
       } else {

@@ -5,57 +5,81 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'widgets/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 
-class ReportBugDialog extends StatefulWidget {
-  const ReportBugDialog(
-      {Key? key, required this.projects, required this.jiraPlatformApi})
-      : super(key: key);
-  final List<j.Project> projects;
-  final j.JiraPlatformApi jiraPlatformApi;
-  @override
-  // ignore: no_logic_in_create_state
-  State<ReportBugDialog> createState() =>
-      // ignore: no_logic_in_create_state
-      _ReportBugDialogState(projects, jiraPlatformApi);
-}
+class ReportBugDialog extends StatelessWidget {
+  const ReportBugDialog({super.key});
 
-class _ReportBugDialogState extends State<ReportBugDialog> {
-  _ReportBugDialogState(this.projects, this.jiraPlatformApi);
-
-  /// Initial Project object to be used in the dropdown. This will be updated when the user selects a different project
-  late j.Project _project;
-
-  /// Initial IssueType object to be used in the dropdown. This will be updated when the user selects a different issue type
-  late _Issue _issue;
-  late FilePickerResult? _attachment;
-  @override
-  void initState() {
-    /// Set the initial project and issue
-    _attachment = const FilePickerResult([]);
-    _project = projects.first;
-    _issue = _Issue(
-      name: '',
-      project: _project,
-      projectKey: _project.key,
-      issueType: 'Bug',
-      description: '',
-    );
-    super.initState();
-  }
-
-  final j.JiraPlatformApi jiraPlatformApi;
-  final List<j.Project> projects;
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<FliraBloc>();
+    final projects = bloc.state.projects;
+
+    final attachment =
+        context.select((FliraBloc value) => value.state.attachment);
+    final issue = context.select((FliraBloc value) => value.state.issue);
+    final project =
+        context.select((FliraBloc value) => value.state.selectedProject);
+
     final ticketFieldNames = [
       'Summary',
       'Description',
     ];
-    return Dialog(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+    return BlocListener<FliraBloc, FliraState>(
+      listener: (context, state) {
+        if (state.status == FliraStatus.failure) {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: Text(state.errorMessage),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          context
+                              .read<FliraBloc>()
+                              .add(FliraButtonDraggedEvent());
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Ok'))
+                  ],
+                );
+              });
+        }
+        if (state.status == FliraStatus.success) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Success'),
+                content: const Text('Do you want to create another ticket?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Yes'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+                    },
+                    child: const Text(
+                      'No',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
+      child: Dialog(
+        child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -72,7 +96,8 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                 const SizedBox(
                   height: 36,
                 ),
-                Text('Project', style: Theme.of(context).textTheme.titleMedium),
+                Text('Project',
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(
                   height: 5,
                 ),
@@ -88,7 +113,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                       borderRadius: BorderRadius.circular(10),
                       autofocus: true,
                       isExpanded: true,
-                      value: _project,
+                      value: project,
                       items: projects
                           .map(
                             (j.Project e) => DropdownMenuItem<j.Project>(
@@ -96,20 +121,17 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                               child: Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Text(e.name ?? '',
-                                    style:
-                                        Theme.of(context).textTheme.bodyText1),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge),
                               ),
                             ),
                           )
                           .toList(),
                       onChanged: (value) {
-                        setState(() {
-                          _project = value!;
-                          _issue = _issue.copyWith(
-                            project: _project,
-                            projectKey: _project.key,
-                          );
-                        });
+                        context
+                            .read<FliraBloc>()
+                            .add(ChangeProjectRequested(value!));
                       },
                     ),
                   ),
@@ -122,20 +144,22 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(e,
-                                style: Theme.of(context).textTheme.subtitle1),
+                                style:
+                                    Theme.of(context).textTheme.titleMedium),
                             const SizedBox(
                               height: 5,
                             ),
                             TextField(
                               onChanged: (value) {
-                                setState(() {
-                                  if (e == 'Summary') {
-                                    _issue = _issue.copyWith(name: value);
-                                  } else if (e == 'Description') {
-                                    _issue =
-                                        _issue.copyWith(description: value);
-                                  }
-                                });
+                                if (e == 'Summary') {
+                                  context
+                                      .read<FliraBloc>()
+                                      .add(SummaryChanged(value));
+                                } else if (e == 'Description') {
+                                  context
+                                      .read<FliraBloc>()
+                                      .add(DescriptionChanged(value));
+                                }
                               },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
@@ -152,9 +176,9 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                   children: [
                     DropdownButton(
                         borderRadius: BorderRadius.circular(10),
-                        hint: _issue.issueType == 'Bug'
+                        hint: issue.issueType == 'Bug'
                             ? const BugMenuItem()
-                            : _issue.issueType == 'Task'
+                            : issue.issueType == 'Task'
                                 ? const TaskMenuItem()
                                 : const StoryMenuItem(),
                         items: const [
@@ -172,27 +196,25 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           ),
                         ],
                         onChanged: (value) {
-                          setState(() {
-                            _issue =
-                                _issue.copyWith(issueType: value.toString());
-                          });
+                          context
+                              .read<FliraBloc>()
+                              .add(IssueTypeChanged(value as String));
                         }),
                     Stack(
                       children: [
                         IconButton(
                           onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
+                            final result =
+                                await FilePicker.platform.pickFiles(
                               type: FileType.media,
                             );
-                            setState(() {
-                              _attachment = result;
-                            });
+                            if (result != null) {
+                              bloc.add(AttachmentChanged(result));
+                            }
                           },
                           icon: const Icon(Icons.attach_file_outlined),
                         ),
-                        if ((_attachment ?? const FilePickerResult([]))
-                            .files
-                            .isNotEmpty)
+                        if ((attachment).files.isNotEmpty)
                           Container(
                             height: 20,
                             width: 20,
@@ -202,10 +224,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                             ),
                             child: Center(
                               child: Text(
-                                (_attachment ?? const FilePickerResult([]))
-                                    .files
-                                    .length
-                                    .toString(),
+                                (attachment).files.length.toString(),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -225,7 +244,6 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                   children: [
                     MaterialButton(
                         onPressed: () async {
-                          
                           Navigator.pop(context);
                         },
                         child: const Text('Cancel')),
@@ -234,116 +252,15 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       disabledColor: Colors.grey,
-                      onPressed: _issue.name.toString().isEmpty ||
-                              _issue.description.toString().isEmpty
+                      onPressed: issue.name.toString().isEmpty ||
+                              issue.description.toString().isEmpty
                           ? null
-                          : () async {
-                              /// Create a new issue
-                              final send = await jiraPlatformApi.issues
-                                  .createIssue(
-                                      body: j.IssueUpdateDetails(
-                                fields: {
-                                  'project': {
-                                    'key': _issue.projectKey,
-                                  },
-                                  'summary': _issue.name,
-                                  "description": {
-                                    "type": "doc",
-                                    "version": 1,
-                                    "content": [
-                                      {
-                                        "type": "paragraph",
-                                        "content": [
-                                          {
-                                            "type": "text",
-                                            "text":
-                                                'Reported using Flira\n\n${_issue.description}',
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  },
-                                  'issuetype': {
-                                    'name': _issue.issueType,
-                                  },
-                                },
-                              ))
-                                  .
-
-                                  /// Catching the error if the ticket is not created
-                                  catchError((onError) {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text('Error'),
-                                        content: Text(onError.toString()),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                context.read<FliraBloc>().add(
-                                                    FliraButtonDraggedEvent());
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text('Ok'))
-                                        ],
-                                      );
-                                    });
-                              })
-
-                                  /// If the ticket is created successfully
-                                  .whenComplete(() {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: const Text('Success'),
-                                      content: const Text(
-                                          'Do you want to create another ticket?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                _attachment = null;
-                              });
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text('Yes'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            Navigator.pop(context);
-                                            context
-                                                .read<FliraBloc>()
-                                                .add(FliraButtonDraggedEvent());
-                                          },
-                                          child: const Text(
-                                            'No',
-                                            style: TextStyle(color: Colors.red),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              });
-
-                              final multiPartFile =
-                                  await j.MultipartFile.fromPath(
-                                      'file', _attachment!.paths.first!,
-                                      filename: _attachment!.names.first);
-
-                               jiraPlatformApi.issueAttachments
-                                  .addAttachment(
-                                      issueIdOrKey: send.id ?? '',
-                                      file: multiPartFile);
-                              // setState(() {
-                              //   _attachment = null;
-                              // });
+                          : ()  {
+                               context.read<FliraBloc>().add(
+                                    const SubmitIssueRequested());
                             },
-                      color:
-                          const Color.fromARGB(255, 8, 0, 255).withOpacity(0.7),
+                      color: const Color.fromARGB(255, 8, 0, 255)
+                          .withOpacity(0.7),
                       child: const Text('Send ticket',
                           style: TextStyle(
                               color: Colors.white,
@@ -360,8 +277,8 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
   }
 }
 
-class _Issue {
-  const _Issue(
+class FliraIssue {
+  const FliraIssue(
       {this.projectKey,
       this.name,
       this.description,
@@ -375,7 +292,7 @@ class _Issue {
   final String? status;
   final j.Project? project;
 
-  _Issue copyWith({
+  FliraIssue copyWith({
     String? projectKey,
     String? name,
     String? description,
@@ -383,7 +300,7 @@ class _Issue {
     String? status,
     j.Project? project,
   }) {
-    return _Issue(
+    return FliraIssue(
       projectKey: projectKey ?? this.projectKey,
       name: name ?? this.name,
       description: description ?? this.description,

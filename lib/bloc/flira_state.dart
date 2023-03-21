@@ -21,8 +21,14 @@ class FliraState extends Equatable {
     this.atlassianUrlPrefix,
     required this.triggeringMethod,
     this.reportDialogOpen = false,
+    this.jiraPlatformApi,
+    required this.projects,
+    required this.issue,
+    required this.attachment,
+    required this.selectedProject,
+    required this.errorMessage,
   });
-  const FliraState.initial()
+  FliraState.initial()
       : this(
             materialAppHeight: 0,
             materialAppWidth: 0,
@@ -30,7 +36,14 @@ class FliraState extends Equatable {
             initialButtonWidth: 0,
             alignment: Alignment.bottomRight,
             status: FliraStatus.initial,
+            projects: [],
+            attachment: const FilePickerResult([]),
+            issue: const FliraIssue(),
+            selectedProject: Project(),
+            errorMessage: '',
             triggeringMethod: TriggeringMethod.none);
+
+
   final double? materialAppWidth;
   final double? materialAppHeight;
   final double? initialButtonWidth;
@@ -43,6 +56,14 @@ class FliraState extends Equatable {
   final String? atlassianUser;
   final String? atlassianUrlPrefix;
   final bool reportDialogOpen;
+  final JiraPlatformApi? jiraPlatformApi;
+  final List<Project> projects;
+  final FliraIssue issue;
+  final FilePickerResult attachment;
+  final Project selectedProject;
+  final String errorMessage;
+
+  
 
   FliraState copyWith({
     double? materialAppWidth,
@@ -57,6 +78,12 @@ class FliraState extends Equatable {
     String? atlassianUser,
     String? atlassianUrlPrefix,
     bool? reportDialogOpen,
+    JiraPlatformApi? jiraPlatformApi,
+    List<Project>? projects,
+    FliraIssue? issue,
+    FilePickerResult? attachment,
+    Project? selectedProject,
+    String? errorMessage,
   }) {
     return FliraState(
       materialAppWidth: materialAppWidth ?? this.materialAppWidth,
@@ -71,6 +98,12 @@ class FliraState extends Equatable {
       atlassianUser: atlassianUser ?? this.atlassianUser,
       atlassianUrlPrefix: atlassianUrlPrefix ?? this.atlassianUrlPrefix,
       reportDialogOpen: reportDialogOpen ?? this.reportDialogOpen,
+      jiraPlatformApi: jiraPlatformApi ?? this.jiraPlatformApi,
+      projects: projects ?? this.projects,
+      issue: issue ?? this.issue,
+      attachment: attachment ?? this.attachment,
+      selectedProject: selectedProject ?? this.selectedProject,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
@@ -88,5 +121,11 @@ class FliraState extends Equatable {
         atlassianUser,
         atlassianUrlPrefix,
         reportDialogOpen,
+        jiraPlatformApi,
+        projects,
+        issue,
+        attachment,
+        selectedProject,
+        errorMessage,
       ];
 }
