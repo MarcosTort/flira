@@ -4,7 +4,7 @@ enum FliraStatus {
   initial,
   loading,
   success,
-  failure,
+  failure, initSuccess, fliraStarted,
 }
 
 class FliraState extends Equatable {

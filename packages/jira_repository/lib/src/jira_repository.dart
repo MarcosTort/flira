@@ -1,15 +1,8 @@
 import 'package:atlassian_apis/jira_platform.dart';
 
 class JiraRepository {
-  const JiraRepository({
-    required this.url,
-    required this.user,
-    required this.token,
-  });
-  final String url;
-  final String user;
-  final String token;
-
+  const JiraRepository();
+  
   Future<ApiClient> _getApiClient(
     String url,
     String user,
@@ -28,7 +21,7 @@ class JiraRepository {
     }
   }
 
-  Future<JiraPlatformApi> getJiraPlatformApi() async {
+  Future<JiraPlatformApi> getJiraPlatformApi(String url,String user, String token) async {
     try {
       final client = await _getApiClient(url, user, token);
       return JiraPlatformApi(client);

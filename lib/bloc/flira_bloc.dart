@@ -46,10 +46,14 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
       status: FliraStatus.loading,
     ));
     try {
-      final jiraPlatformApi = await _jiraRepository.getJiraPlatformApi();
+      final jiraPlatformApi = await _jiraRepository.getJiraPlatformApi(
+          state.atlassianUrlPrefix?? '',
+          state.atlassianUser?? '',
+          state.atlassianApiToken?? ''
+      );
       final projects = await jiraPlatformApi.projects.getAllProjects();
       emit(state.copyWith(
-        status: FliraStatus.success,
+        status: FliraStatus.initSuccess,
         jiraPlatformApi: jiraPlatformApi,
         projects: projects,
       ));
@@ -88,7 +92,7 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     emit(state.copyWith(
       initialButtonHeight: 0,
       initialButtonWidth: 0,
-      status: FliraStatus.initial,
+      status: FliraStatus.fliraStarted,
     ));
   }
 

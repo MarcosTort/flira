@@ -18,8 +18,8 @@ dependencies:
     path: packages/jira_repository/
   flutter_secure_storage: ^7.0.1
   permission_handler: ^10.2.0
-  screenshot_callback: ^2.0.3
-  shake: ^2.2.0  
+  # screenshot_callback: ^2.0.3
+  # shake: ^2.2.0  
 dev_dependencies:
   flutter_test:
     sdk: flutter

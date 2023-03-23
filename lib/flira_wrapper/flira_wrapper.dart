@@ -2,8 +2,8 @@ import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:screenshot_callback/screenshot_callback.dart';
-import 'package:shake/shake.dart';
+// import 'package:screenshot_callback/screenshot_callback.dart';
+// import 'package:shake/shake.dart';
 import '../flira.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -21,24 +21,24 @@ class FliraOverlay extends StatelessWidget {
     final canTriggerDialog = !reportDialogOpen;
     Flira fliraClient = Flira();
     if (triggeringMethod == TriggeringMethod.screenshot) {
-      final screenshotCallback = ScreenshotCallback();
+      // final screenshotCallback = ScreenshotCallback();
 
-      screenshotCallback.initialize().whenComplete(() => checkPermissions());
-      screenshotCallback.addListener(
-        () {
-          if (canTriggerDialog) {
-            context.read<FliraBloc>().add(FliraTriggeredEvent());
-          }
-        },
-      );
+      // screenshotCallback.initialize().whenComplete(() => checkPermissions());
+      // screenshotCallback.addListener(
+      //   () {
+      //     if (canTriggerDialog) {
+      //       context.read<FliraBloc>().add(FliraTriggeredEvent());
+      //     }
+      //   },
+      // );
     } else if (triggeringMethod == TriggeringMethod.shaking) {
-      ShakeDetector.autoStart(
-        onPhoneShake: () {
-          if (canTriggerDialog) {
-            context.read<FliraBloc>().add(FliraTriggeredEvent());
-          }
-        },
-      );
+      // ShakeDetector.autoStart(
+      //   onPhoneShake: () {
+      //     if (canTriggerDialog) {
+      //       context.read<FliraBloc>().add(FliraTriggeredEvent());
+      //     }
+      //   },
+      // );
     }
 
     return BlocBuilder<FliraBloc, FliraState>(
@@ -90,7 +90,23 @@ class _FloatingButton extends StatelessWidget {
   final Flira fliraClient;
   @override
   Widget build(BuildContext ctx) {
-    return BlocBuilder<FliraBloc, FliraState>(
+    return BlocConsumer<FliraBloc, FliraState>(
+      listener: (context, state) {
+        if (state.status == FliraStatus.initSuccess ||
+            state.status == FliraStatus.failure) {
+          ctx.read<FliraBloc>().add(InitialButtonTappedEvent());
+        }
+
+        if (state.status == FliraStatus.failure) {
+          settingsDialog(
+            ctx,
+            message: state.errorMessage,
+          );
+        }
+        if (state.status == FliraStatus.fliraStarted) {
+          Flira().displayReportDialog(context);
+        }
+      },
       builder: (context, state) {
         final width = state.initialButtonWidth;
         final height = state.initialButtonHeight;
@@ -104,8 +120,7 @@ class _FloatingButton extends StatelessWidget {
                 context.read<FliraBloc>().add(FliraButtonDraggedEvent());
               },
               onTap: () async {
-                ctx.read<FliraBloc>().add(InitialButtonTappedEvent());
-                fliraClient.displayReportDialog(ctx);
+                ctx.read<FliraBloc>().add(const InitJiraRequested());
               },
               child: Material(
                 shape: const CircleBorder(),

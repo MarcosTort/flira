@@ -66,13 +66,11 @@ class LoadCredentialsFromStorageEvent extends FliraEvent {
 }
 
 class InitJiraRequested extends FliraEvent {
-  const InitJiraRequested(this.url, this.user, this.token);
-  final String? url;
-  final String? user;
-  final String? token;
+  const InitJiraRequested();
+
 
   @override
-  List<Object?> get props => [url, user, token];
+  List<Object?> get props => [];
 }
 class SubmitIssueRequested extends FliraEvent {
   const SubmitIssueRequested();

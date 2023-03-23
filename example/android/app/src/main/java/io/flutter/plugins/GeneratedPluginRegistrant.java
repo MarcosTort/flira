@@ -35,15 +35,5 @@ public final class GeneratedPluginRegistrant {
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin permission_handler_android, com.baseflow.permissionhandler.PermissionHandlerPlugin", e);
     }
-    try {
-      flutterEngine.getPlugins().add(new com.flutter.moum.screenshot_callback.ScreenshotCallbackPlugin());
-    } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin screenshot_callback, com.flutter.moum.screenshot_callback.ScreenshotCallbackPlugin", e);
-    }
-    try {
-      flutterEngine.getPlugins().add(new dev.fluttercommunity.plus.sensors.SensorsPlugin());
-    } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin sensors_plus, dev.fluttercommunity.plus.sensors.SensorsPlugin", e);
-    }
   }
 }
