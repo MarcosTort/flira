@@ -5,66 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jira_repository/jira_repository.dart';
 import 'flira_wrapper/flira_wrapper.dart';
-import 'report_dialog/report_dialog.dart';
-
-/// This is the main class
-class Flira {
-  Flira();
-
-  /// This void function will show the report dialog in which we can report our issues
-
-  Future<void> displayReportDialog(BuildContext context) async {
-    try {
-      final jiraPlatformApi =
-          context.select((FliraBloc bloc) => bloc.state.jiraPlatformApi)!;
-
-      /// Here we get the projects of the current atlassianUrl
-      final projects = await jiraPlatformApi.projects.getAllProjects();
-      // get all the issues in a project
-      jiraPlatformApi.issueSearch
-          .searchForIssuesUsingJql(jql: 'project = ${projects.first.key}');
-
-      if (projects.isEmpty) {
-        throw Exception;
-      } else {
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          () => showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) => Stack(
-              children: [
-                const ReportBugDialog(),
-                Material(
-                  color: Colors.transparent,
-                  child: IconButton(
-                      onPressed: () {
-                        settingsDialog(context,
-                            fromSettings: true,
-                            message:
-                                'Settings\n \nTo get a new token go to: \n');
-                      },
-                      icon: const Icon(
-                        Icons.settings,
-                        color: Colors.white,
-                        size: 40,
-                      )),
-                )
-              ],
-            ),
-          ).whenComplete(() async => Future.delayed(
-                const Duration(microseconds: 100),
-                () => context.read<FliraBloc>().add(
-                      FliraButtonDraggedEvent(),
-                    ),
-              )),
-        );
-      }
-    } catch (e) {
-      settingsDialog(context);
-    }
-  }
-}
 
 class FliraWrapper extends StatelessWidget {
   const FliraWrapper({

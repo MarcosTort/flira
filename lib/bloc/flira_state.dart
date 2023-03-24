@@ -4,7 +4,7 @@ enum FliraStatus {
   initial,
   loading,
   success,
-  failure, initSuccess, fliraStarted,
+  failure, initSuccess, fliraStarted, ticketSubmittionError, ticketSubmittionSuccess,
 }
 
 class FliraState extends Equatable {
@@ -38,7 +38,12 @@ class FliraState extends Equatable {
             status: FliraStatus.initial,
             projects: [],
             attachment: const FilePickerResult([]),
-            issue: const FliraIssue(),
+            issue: const FliraIssue(
+               issueType: 'Bug',
+               description: '',
+               name: '',
+               
+            ),
             selectedProject: Project(),
             errorMessage: '',
             triggeringMethod: TriggeringMethod.none);
@@ -84,6 +89,7 @@ class FliraState extends Equatable {
     FilePickerResult? attachment,
     Project? selectedProject,
     String? errorMessage,
+    
   }) {
     return FliraState(
       materialAppWidth: materialAppWidth ?? this.materialAppWidth,

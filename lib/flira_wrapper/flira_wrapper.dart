@@ -1,4 +1,5 @@
 import 'package:flira/bloc/flira_bloc.dart';
+import 'package:flira/report_dialog/report_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,7 +20,7 @@ class FliraOverlay extends StatelessWidget {
     final reportDialogOpen =
         context.select((FliraBloc value) => value.state.reportDialogOpen);
     final canTriggerDialog = !reportDialogOpen;
-    Flira fliraClient = Flira();
+    ReportBugDialog fliraClient = const ReportBugDialog();
     if (triggeringMethod == TriggeringMethod.screenshot) {
       // final screenshotCallback = ScreenshotCallback();
 
@@ -87,10 +88,12 @@ class _FloatingButton extends StatelessWidget {
     Key? key,
     required this.fliraClient,
   }) : super(key: key);
-  final Flira fliraClient;
+  final ReportBugDialog fliraClient;
   @override
   Widget build(BuildContext ctx) {
     return BlocConsumer<FliraBloc, FliraState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status,
       listener: (context, state) {
         if (state.status == FliraStatus.initSuccess ||
             state.status == FliraStatus.failure) {
@@ -104,8 +107,59 @@ class _FloatingButton extends StatelessWidget {
           );
         }
         if (state.status == FliraStatus.fliraStarted) {
-          Flira().displayReportDialog(context);
+          const ReportBugDialog().open(state.projects,context);
         }
+        if (state.status == FliraStatus.ticketSubmittionError) {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: Text(state.errorMessage),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          context
+                              .read<FliraBloc>()
+                              .add(FliraButtonDraggedEvent());
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Ok'))
+                  ],
+                );
+              });
+        }
+        if (state.status == FliraStatus.ticketSubmittionSuccess) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Success'),
+                content: const Text('Do you want to create another ticket?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Yes'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+                    },
+                    child: const Text(
+                      'No',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+
       },
       builder: (context, state) {
         final width = state.initialButtonWidth;
