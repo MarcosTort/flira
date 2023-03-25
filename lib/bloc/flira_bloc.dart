@@ -1,5 +1,5 @@
 import 'package:atlassian_apis/jira_platform.dart';
-import 'package:flira/report_dialog/report_dialog.dart';
+import 'package:flira/dialogs/report_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';

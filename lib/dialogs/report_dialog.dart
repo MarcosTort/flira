@@ -1,4 +1,5 @@
 import 'package:flira/bloc/flira_bloc.dart';
+import 'package:flira/dialogs/dialogs.dart';
 import 'package:flira/flira.dart';
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' hide Icon;
@@ -227,10 +228,10 @@ class ReportBugDialog extends StatelessWidget {
                       color: Colors.transparent,
                       child: IconButton(
                           onPressed: () {
-                            settingsDialog(context,
+                            const SettingsDialog(
                                 fromSettings: true,
                                 message:
-                                    'Settings\n \nTo get a new token go to: \n');
+                                    'Settings\n \nTo get a new token go to: \n').open(context);
                           },
                           icon: const Icon(
                             Icons.settings,
@@ -249,7 +250,9 @@ class ReportBugDialog extends StatelessWidget {
         );
       }
     } catch (e) {
-      settingsDialog(context);
+      const SettingsDialog(
+
+      ).open(context);
     }
   }
 }

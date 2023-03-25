@@ -21,23 +21,29 @@ class FliraWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Stack(children: [
-        app,
-        BlocProvider(
-          create: (ctx) => FliraBloc(
-            jiraRepository: const JiraRepository(),
-          )
-            ..add(
-              LoadCredentialsFromStorageEvent(),
+    return Theme(
+      data: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(children: [
+          app,
+          BlocProvider(
+            create: (ctx) => FliraBloc(
+              jiraRepository: const JiraRepository(),
             )
-            ..add(FliraTriggeredEvent()),
-          child: FliraOverlay(
-            triggeringMethod: triggeringMethod,
-          ),
-        )
-      ]),
+              ..add(
+                LoadCredentialsFromStorageEvent(),
+              )
+              ..add(FliraTriggeredEvent()),
+            child: FliraOverlay(
+              triggeringMethod: triggeringMethod,
+            ),
+          )
+        ]),
+      ),
     );
   }
 }
@@ -49,87 +55,4 @@ enum TriggeringMethod {
 }
 
 const curve = Curves.linearToEaseOut;
-Future<dynamic> settingsDialog(BuildContext context,
-    {bool fromSettings = false,
-    String message =
-        'No projects found. Please check your api token and url. To get a new token, go to:\n'}) {
-  return showDialog(
-    barrierDismissible: false,
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Column(
-        children: [
-          Text(
-            message,
-          ),
-          const SelectableText(
-            'https://id.atlassian.com/manage-profile/security/api-tokens',
-            style: TextStyle(color: Colors.blue),
-          ),
-        ],
-      ),
-      actions: [
-        TextFormField(
-          initialValue:
-              context.select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
-          onChanged: (value) => context.read<FliraBloc>().add(
-                UrlTextFieldOnChangedEvent(value),
-              ),
-          decoration: const InputDecoration(
-            hintText: 'Enter your jira server name',
-          ),
-        ),
-        TextFormField(
-          initialValue:
-              context.select((FliraBloc bloc) => bloc.state.atlassianUser),
-          onChanged: (value) => context.read<FliraBloc>().add(
-                UserTextFieldOnChangedEvent(value),
-              ),
-          decoration: const InputDecoration(
-            hintText: 'Enter your jira user email',
-          ),
-        ),
-        TextFormField(
-          obscureText: true,
-          initialValue:
-              context.select((FliraBloc bloc) => bloc.state.atlassianApiToken),
-          onChanged: (value) => context.read<FliraBloc>().add(
-                TokenTextFieldOnChangedEvent(value),
-              ),
-          decoration: const InputDecoration(
-            hintText: 'Enter your api token',
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            TextButton(
-              onPressed: () {
-                if (!fromSettings) {
-                  context.read<FliraBloc>().add(FliraButtonDraggedEvent());
-                }
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                context.read<FliraBloc>().add(
-                      const AddCredentialsEvent(),
-                    );
-                await Future.delayed(const Duration(milliseconds: 200))
-                    .whenComplete(() {
-                  Navigator.pop(context);
-                  if (!fromSettings) {
-                    context.read<FliraBloc>().add(FliraButtonDraggedEvent());
-                  }
-                });
-              },
-              child: const Text('Ok'),
-            ),
-          ],
-        )
-      ],
-    ),
-  );
-}
+

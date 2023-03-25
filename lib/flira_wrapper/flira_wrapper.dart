@@ -1,10 +1,10 @@
 import 'package:flira/bloc/flira_bloc.dart';
-import 'package:flira/report_dialog/report_dialog.dart';
+import 'package:flira/dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// import 'package:screenshot_callback/screenshot_callback.dart';
-// import 'package:shake/shake.dart';
+import 'package:screenshot_callback/screenshot_callback.dart';
+import 'package:shake/shake.dart';
 import '../flira.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -22,24 +22,24 @@ class FliraOverlay extends StatelessWidget {
     final canTriggerDialog = !reportDialogOpen;
     ReportBugDialog fliraClient = const ReportBugDialog();
     if (triggeringMethod == TriggeringMethod.screenshot) {
-      // final screenshotCallback = ScreenshotCallback();
+      final screenshotCallback = ScreenshotCallback();
 
-      // screenshotCallback.initialize().whenComplete(() => checkPermissions());
-      // screenshotCallback.addListener(
-      //   () {
-      //     if (canTriggerDialog) {
-      //       context.read<FliraBloc>().add(FliraTriggeredEvent());
-      //     }
-      //   },
-      // );
+      screenshotCallback.initialize().whenComplete(() => checkPermissions());
+      screenshotCallback.addListener(
+        () {
+          if (canTriggerDialog) {
+            context.read<FliraBloc>().add(FliraTriggeredEvent());
+          }
+        },
+      );
     } else if (triggeringMethod == TriggeringMethod.shaking) {
-      // ShakeDetector.autoStart(
-      //   onPhoneShake: () {
-      //     if (canTriggerDialog) {
-      //       context.read<FliraBloc>().add(FliraTriggeredEvent());
-      //     }
-      //   },
-      // );
+      ShakeDetector.autoStart(
+        onPhoneShake: () {
+          if (canTriggerDialog) {
+            context.read<FliraBloc>().add(FliraTriggeredEvent());
+          }
+        },
+      );
     }
 
     return BlocBuilder<FliraBloc, FliraState>(
@@ -92,8 +92,7 @@ class _FloatingButton extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     return BlocConsumer<FliraBloc, FliraState>(
-      listenWhen: (previous, current) =>
-          previous.status != current.status,
+      listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
         if (state.status == FliraStatus.initSuccess ||
             state.status == FliraStatus.failure) {
@@ -101,65 +100,20 @@ class _FloatingButton extends StatelessWidget {
         }
 
         if (state.status == FliraStatus.failure) {
-          settingsDialog(
-            ctx,
+          SettingsDialog(
+            fromSettings: false,
             message: state.errorMessage,
-          );
+          ).open(context);
         }
         if (state.status == FliraStatus.fliraStarted) {
-          const ReportBugDialog().open(state.projects,context);
+          const ReportBugDialog().open(state.projects, context);
         }
         if (state.status == FliraStatus.ticketSubmittionError) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: const Text('Error'),
-                  content: Text(state.errorMessage),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          context
-                              .read<FliraBloc>()
-                              .add(FliraButtonDraggedEvent());
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Ok'))
-                  ],
-                );
-              });
+          ErrorDialog(message: state.errorMessage,).open(context);
         }
         if (state.status == FliraStatus.ticketSubmittionSuccess) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Success'),
-                content: const Text('Do you want to create another ticket?'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Yes'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      context.read<FliraBloc>().add(FliraButtonDraggedEvent());
-                    },
-                    child: const Text(
-                      'No',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
+          const SuccessDialog().open(context);
         }
-
       },
       builder: (context, state) {
         final width = state.initialButtonWidth;
