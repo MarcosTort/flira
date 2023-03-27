@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 
-class BugMenuItem extends StatelessWidget {
-  const BugMenuItem({
+class TaskMenuItem extends StatelessWidget {
+  const TaskMenuItem({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(4),
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: Colors.red,
+            color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(2),
           ),
-          child: const Icon(
-            Icons.circle,
-            color: Colors.white,
-            size: 10,
+          child:  Icon(
+            Icons.check,
+            color: theme.colorScheme.secondary,
+            size: 15,
           ),
         ),
         const SizedBox(
           width: 16,
         ),
-        const Text('Bug'),
+        const Text('Task'),
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flira/bloc/flira_bloc.dart';
+import 'package:flira/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,15 +14,16 @@ class SettingsDialog extends StatelessWidget {
   final String message;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: Column(
         children: [
           Text(
             message,
           ),
-          const SelectableText(
-            'https://id.atlassian.com/manage-profile/security/api-tokens',
-            style: TextStyle(color: Colors.blue),
+           SelectableText(
+            katlassianUrl,
+            style: TextStyle(color: theme.colorScheme.primary),
           ),
         ],
       ),

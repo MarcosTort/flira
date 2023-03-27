@@ -1,5 +1,6 @@
 import 'package:atlassian_apis/jira_platform.dart';
-import 'package:flira/dialogs/report_dialog.dart';
+import 'package:flira/models/trigger_method.dart';
+import 'package:flira/view/dialogs/report_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jira_repository/jira_repository.dart';
 
-import '../flira.dart';
+import '../models/models.dart';
+
 part 'flira_event.dart';
 part 'flira_state.dart';
 
