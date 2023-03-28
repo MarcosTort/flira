@@ -22,7 +22,10 @@ class JiraRepository {
   }
 
   Future<JiraPlatformApi> getJiraPlatformApi(
-      String url, String user, String token,) async {
+    String url,
+    String user,
+    String token,
+  ) async {
     try {
       final client = await _getApiClient(url, user, token);
       return JiraPlatformApi(client);
