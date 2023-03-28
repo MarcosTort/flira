@@ -38,6 +38,6 @@ class SuccessDialog extends StatelessWidget {
       barrierDismissible: false,
       context: context,
       builder: (context) => this,
-    ).then((value) => context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
+    );
   }
 }

@@ -1,6 +1,14 @@
 import 'package:atlassian_apis/jira_platform.dart';
 
 class FliraIssue {
+  const FliraIssue.initial({
+    this.issueType = 'Bug',
+    this.description = '',
+    this.name = '',
+    this.project,
+    this.projectKey,
+    this.status,
+  });
   const FliraIssue(
       {this.projectKey,
       this.name,

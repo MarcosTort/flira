@@ -3,6 +3,7 @@ import 'package:flira/consts.dart';
 import 'package:flira/models/models.dart';
 import 'package:flira/view/dialogs/dialogs.dart';
 import 'package:flira/view/view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -63,6 +64,7 @@ class FliraOverlay extends StatelessWidget {
               delegates: const [
                 DefaultMaterialLocalizations.delegate,
                 DefaultWidgetsLocalizations.delegate,
+                DefaultCupertinoLocalizations.delegate
               ],
               locale: const Locale('en', 'US'),
               child: MediaQuery(

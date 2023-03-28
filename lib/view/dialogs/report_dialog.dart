@@ -16,11 +16,8 @@ class ReportBugDialog extends StatelessWidget {
 
     final project =
         context.select((FliraBloc value) => value.state.selectedProject);
-
-    final ticketFieldNames = [
-      'Summary',
-      'Description',
-    ];
+    final isLoading = context
+        .select((FliraBloc value) => value.state.status == FliraStatus.loading);
     return Dialog(
       child: SingleChildScrollView(
         child: Padding(
@@ -28,64 +25,45 @@ class ReportBugDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            isLoading? const Center(
+              child: SizedBox(
+                height: 450,
+                width: 224,
+                child: CircularProgressIndicator.adaptive()),
+            ):
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Create Issue',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Create Issue',
+                          style: Theme.of(context).textTheme.titleLarge),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 36,
+                  ),
+                  Text('Project',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  _ProjectSelector(project: project, projects: projects),
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  const _Form(),
+                  Row(
+                    children: const [_IssueTypeSelector(), _AttachmentButton()],
+                  ),
+                  const SizedBox(
+                    height: 24,
+                  ),
                 ],
-              ),
-              const SizedBox(
-                height: 36,
-              ),
-              Text('Project', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(
-                height: 5,
-              ),
-              _ProjectSelector(project: project, projects: projects),
-              const SizedBox(
-                height: 25,
-              ),
-              ...ticketFieldNames
-                  .map((e) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(e,
-                              style: Theme.of(context).textTheme.titleMedium),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          TextField(
-                            onChanged: (value) {
-                              if (e == 'Summary') {
-                                context
-                                    .read<FliraBloc>()
-                                    .add(SummaryChanged(value));
-                              } else if (e == 'Description') {
-                                context
-                                    .read<FliraBloc>()
-                                    .add(DescriptionChanged(value));
-                              }
-                            },
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(6)),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                        ],
-                      ))
-                  .toList(),
-              Row(
-                children: const [_IssueTypeSelector(), _AttachmentButton()],
-              ),
-              const SizedBox(
-                height: 24,
               ),
               const _ActionButtons()
             ],
@@ -142,13 +120,56 @@ class ReportBugDialog extends StatelessWidget {
   }
 }
 
+class _Form extends StatelessWidget {
+  const _Form();
+
+  @override
+  Widget build(BuildContext context) {
+    final ticketFieldNames = [
+      'Summary',
+      'Description',
+    ];
+    return ListView.builder(
+      itemCount: ticketFieldNames.length,
+      shrinkWrap: true,
+      itemBuilder: (context, index) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(ticketFieldNames[index],
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(
+            height: 5,
+          ),
+          TextField(
+            onChanged: (value) {
+              if (ticketFieldNames[index] == 'Summary') {
+                context.read<FliraBloc>().add(SummaryChanged(value));
+              } else if (ticketFieldNames[index] == 'Description') {
+                context.read<FliraBloc>().add(DescriptionChanged(value));
+              }
+            },
+            decoration: InputDecoration(
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+            ),
+          ),
+          const SizedBox(
+            height: 25,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ActionButtons extends StatelessWidget {
   const _ActionButtons();
 
   @override
   Widget build(BuildContext context) {
     final issue = context.select((FliraBloc value) => value.state.issue);
-
+    final isLoading = context
+        .select((FliraBloc value) => value.state.status == FliraStatus.loading);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -158,8 +179,8 @@ class _ActionButtons extends StatelessWidget {
             },
             child: const Text('Cancel')),
         SubmitButton(
-          onPressed: issue.name.toString().isEmpty ||
-                  issue.description.toString().isEmpty
+          onPressed: (issue.name.toString().isEmpty ||
+                  issue.description.toString().isEmpty) && !isLoading
               ? null
               : () {
                   context.read<FliraBloc>().add(const SubmitIssueRequested());
@@ -303,16 +324,12 @@ class SubmitButton extends StatelessWidget {
     final theme = Theme.of(context);
     final isLoading = context
         .select((FliraBloc bloc) => bloc.state.status == FliraStatus.loading);
-    return isLoading
-        ? CircularProgressIndicator(
-            color: theme.colorScheme.primary.withOpacity(0.7),
-          )
-        : MaterialButton(
+    return MaterialButton(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
             disabledColor: theme.colorScheme.onBackground,
-            onPressed: onPressed,
+            onPressed:!isLoading? onPressed: null,
             color: theme.colorScheme.primary.withOpacity(0.7),
             child: Text('Send ticket',
                 style: TextStyle(

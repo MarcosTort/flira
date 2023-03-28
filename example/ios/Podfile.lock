@@ -38,9 +38,13 @@ PODS:
     - Flutter
   - permission_handler_apple (9.0.4):
     - Flutter
+  - screenshot_callback (0.0.1):
+    - Flutter
   - SDWebImage (5.13.3):
     - SDWebImage/Core (= 5.13.3)
   - SDWebImage/Core (5.13.3)
+  - sensors_plus (0.0.1):
+    - Flutter
   - SwiftyGif (5.4.3)
 
 DEPENDENCIES:
@@ -48,6 +52,8 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - screenshot_callback (from `.symlinks/plugins/screenshot_callback/ios`)
+  - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
 
 SPEC REPOS:
   trunk:
@@ -65,6 +71,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  screenshot_callback:
+    :path: ".symlinks/plugins/screenshot_callback/ios"
+  sensors_plus:
+    :path: ".symlinks/plugins/sensors_plus/ios"
 
 SPEC CHECKSUMS:
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
@@ -73,7 +83,9 @@ SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
+  screenshot_callback: b173e7f4bd8d2ef14a9a5e5a77c0ac6a47578608
   SDWebImage: af5bbffef2cde09f148d826f9733dcde1a9414cd
+  sensors_plus: 5717760720f7e6acd96fdbd75b7428f5ad755ec2
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3

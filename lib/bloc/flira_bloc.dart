@@ -1,6 +1,4 @@
 import 'package:atlassian_apis/jira_platform.dart';
-import 'package:flira/models/trigger_method.dart';
-import 'package:flira/view/dialogs/report_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -216,7 +214,11 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
   await state.jiraPlatformApi!.issueAttachments
       .addAttachment(issueIdOrKey: send!.id!, file: multiPartFile);
 }
-      emit(state.copyWith(attachment: null, status: FliraStatus.ticketSubmittionSuccess));
+      emit(state.copyWith(attachment: null, status: FliraStatus.ticketSubmittionSuccess, issue: FliraIssue.initial(
+        projectKey: state.selectedProject.key,
+        project: state.selectedProject,
+      
+      )));
     } on Exception catch (e) {
       emit(state.copyWith(
         status: FliraStatus.ticketSubmittionError,
