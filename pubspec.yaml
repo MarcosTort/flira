@@ -14,8 +14,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.1
-  jira_repository:
-    path: packages/jira_repository/
   flutter_secure_storage: ^7.0.1
   permission_handler: ^10.2.0
   screenshot_callback: ^2.0.3
