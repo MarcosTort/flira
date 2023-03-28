@@ -31,7 +31,7 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     on<SummaryChanged>(_onSummaryChanged);
     on<DescriptionChanged>(_onDescriptionChanged);
     on<IssueTypeChanged>(_onIssueTypeChanged);
-    on<AttachmentChanged>( _onAttachmentChanged);
+    on<AttachmentChanged>(_onAttachmentChanged);
   }
   final storage = const FlutterSecureStorage();
   final JiraRepository _jiraRepository;
@@ -53,10 +53,9 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     ));
     try {
       final jiraPlatformApi = await _jiraRepository.getJiraPlatformApi(
-          state.atlassianUrlPrefix?? '',
-          state.atlassianUser?? '',
-          state.atlassianApiToken?? ''
-      );
+          state.atlassianUrlPrefix ?? '',
+          state.atlassianUser ?? '',
+          state.atlassianApiToken ?? '');
       final projects = await jiraPlatformApi.projects.getAllProjects();
       emit(state.copyWith(
         status: FliraStatus.initSuccess,
@@ -206,19 +205,21 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
         throw Exception('Error: $onError');
       });
       if (state.attachment != const FilePickerResult([])) {
-  final multiPartFile = await MultipartFile.fromPath(
-    'file',
-    state.attachment.paths.first!,
-    filename: state.attachment.names.first!,
-  );
-  await state.jiraPlatformApi!.issueAttachments
-      .addAttachment(issueIdOrKey: send!.id!, file: multiPartFile);
-}
-      emit(state.copyWith(attachment: null, status: FliraStatus.ticketSubmittionSuccess, issue: FliraIssue.initial(
-        projectKey: state.selectedProject.key,
-        project: state.selectedProject,
-      
-      )));
+        final multiPartFile = await MultipartFile.fromPath(
+          'file',
+          state.attachment.paths.first!,
+          filename: state.attachment.names.first!,
+        );
+        await state.jiraPlatformApi!.issueAttachments
+            .addAttachment(issueIdOrKey: send!.id!, file: multiPartFile);
+      }
+      emit(state.copyWith(
+          attachment: null,
+          status: FliraStatus.ticketSubmittionSuccess,
+          issue: FliraIssue.initial(
+            projectKey: state.selectedProject.key,
+            project: state.selectedProject,
+          )));
     } on Exception catch (e) {
       emit(state.copyWith(
         status: FliraStatus.ticketSubmittionError,

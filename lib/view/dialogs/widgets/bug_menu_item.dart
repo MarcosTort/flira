@@ -16,7 +16,7 @@ class BugMenuItem extends StatelessWidget {
             color: theme.colorScheme.error,
             borderRadius: BorderRadius.circular(2),
           ),
-          child:  Icon(
+          child: Icon(
             Icons.circle,
             color: theme.colorScheme.secondary,
             size: 10,

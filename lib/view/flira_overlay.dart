@@ -88,8 +88,6 @@ class FliraOverlay extends StatelessWidget {
   }
 }
 
-
-
 Future<void> _checkPermissions() async {
   final status = await Permission.storage.status;
   if (status.isDenied) {

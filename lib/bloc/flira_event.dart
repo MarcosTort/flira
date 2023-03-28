@@ -68,16 +68,17 @@ class LoadCredentialsFromStorageEvent extends FliraEvent {
 class InitJiraRequested extends FliraEvent {
   const InitJiraRequested();
 
-
   @override
   List<Object?> get props => [];
 }
+
 class SubmitIssueRequested extends FliraEvent {
   const SubmitIssueRequested();
 
   @override
   List<Object?> get props => [];
 }
+
 class ChangeProjectRequested extends FliraEvent {
   const ChangeProjectRequested(this.project);
 
@@ -86,6 +87,7 @@ class ChangeProjectRequested extends FliraEvent {
   @override
   List<Object?> get props => [project];
 }
+
 class SummaryChanged extends FliraEvent {
   const SummaryChanged(this.summary);
 
@@ -94,6 +96,7 @@ class SummaryChanged extends FliraEvent {
   @override
   List<Object?> get props => [summary];
 }
+
 class DescriptionChanged extends FliraEvent {
   const DescriptionChanged(this.description);
 
@@ -102,6 +105,7 @@ class DescriptionChanged extends FliraEvent {
   @override
   List<Object?> get props => [description];
 }
+
 class IssueTypeChanged extends FliraEvent {
   const IssueTypeChanged(this.issueType);
 
@@ -110,6 +114,7 @@ class IssueTypeChanged extends FliraEvent {
   @override
   List<Object?> get props => [issueType];
 }
+
 class AttachmentChanged extends FliraEvent {
   const AttachmentChanged(this.attachment);
 

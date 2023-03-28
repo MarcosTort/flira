@@ -16,7 +16,7 @@ class TaskMenuItem extends StatelessWidget {
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(2),
           ),
-          child:  Icon(
+          child: Icon(
             Icons.check,
             color: theme.colorScheme.secondary,
             size: 15,

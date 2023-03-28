@@ -4,7 +4,6 @@ import 'package:flira/view/dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class FloatingButton extends StatelessWidget {
   const FloatingButton({
     Key? key,
@@ -13,7 +12,6 @@ class FloatingButton extends StatelessWidget {
   final ReportBugDialog fliraClient;
   @override
   Widget build(BuildContext context) {
-
     return BlocConsumer<FliraBloc, FliraState>(
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
@@ -22,12 +20,13 @@ class FloatingButton extends StatelessWidget {
           context.read<FliraBloc>().add(InitialButtonTappedEvent());
         }
 
-        
         if (state.status == FliraStatus.fliraStarted) {
           const ReportBugDialog().open(state.projects, context);
         }
         if (state.status == FliraStatus.ticketSubmittionError) {
-          ErrorDialog(message: state.errorMessage,).open(context);
+          ErrorDialog(
+            message: state.errorMessage,
+          ).open(context);
         }
         if (state.status == FliraStatus.ticketSubmittionSuccess) {
           const SuccessDialog().open(context);
@@ -53,7 +52,7 @@ class FloatingButton extends StatelessWidget {
                 shape: const CircleBorder(),
                 child: AnimatedContainer(
                   curve: kcurve,
-                  decoration:  BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -62,7 +61,7 @@ class FloatingButton extends StatelessWidget {
                   height: height,
                   child: Center(
                     child: state.status == FliraStatus.initial
-                        ?  FittedBox(
+                        ? FittedBox(
                             child: Text(
                               'Flira',
                               style: TextStyle(
@@ -72,7 +71,7 @@ class FloatingButton extends StatelessWidget {
                               ),
                             ),
                           )
-                        :  CircularProgressIndicator(
+                        : CircularProgressIndicator(
                             color: theme.colorScheme.secondary,
                           ),
                   ),

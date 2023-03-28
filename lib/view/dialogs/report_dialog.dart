@@ -25,46 +25,50 @@ class ReportBugDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            isLoading? const Center(
-              child: SizedBox(
-                height: 450,
-                width: 224,
-                child: CircularProgressIndicator.adaptive()),
-            ):
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Create Issue',
-                          style: Theme.of(context).textTheme.titleLarge),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 36,
-                  ),
-                  Text('Project',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  _ProjectSelector(project: project, projects: projects),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  const _Form(),
-                  Row(
-                    children: const [_IssueTypeSelector(), _AttachmentButton()],
-                  ),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                ],
-              ),
+              isLoading
+                  ? const Center(
+                      child: SizedBox(
+                          height: 450,
+                          width: 224,
+                          child: CircularProgressIndicator.adaptive()),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Create Issue',
+                                style: Theme.of(context).textTheme.titleLarge),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 36,
+                        ),
+                        Text('Project',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        _ProjectSelector(project: project, projects: projects),
+                        const SizedBox(
+                          height: 25,
+                        ),
+                        const _Form(),
+                        Row(
+                          children: const [
+                            _IssueTypeSelector(),
+                            _AttachmentButton()
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                      ],
+                    ),
               const _ActionButtons()
             ],
           ),
@@ -180,7 +184,8 @@ class _ActionButtons extends StatelessWidget {
             child: const Text('Cancel')),
         SubmitButton(
           onPressed: (issue.name.toString().isEmpty ||
-                  issue.description.toString().isEmpty) && !isLoading
+                      issue.description.toString().isEmpty) &&
+                  !isLoading
               ? null
               : () {
                   context.read<FliraBloc>().add(const SubmitIssueRequested());
@@ -325,16 +330,15 @@ class SubmitButton extends StatelessWidget {
     final isLoading = context
         .select((FliraBloc bloc) => bloc.state.status == FliraStatus.loading);
     return MaterialButton(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-            disabledColor: theme.colorScheme.onBackground,
-            onPressed:!isLoading? onPressed: null,
-            color: theme.colorScheme.primary.withOpacity(0.7),
-            child: Text('Send ticket',
-                style: TextStyle(
-                    color: theme.colorScheme.secondary,
-                    fontWeight: FontWeight.w700)),
-          );
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+      ),
+      disabledColor: theme.colorScheme.onBackground,
+      onPressed: !isLoading ? onPressed : null,
+      color: theme.colorScheme.primary.withOpacity(0.7),
+      child: Text('Send ticket',
+          style: TextStyle(
+              color: theme.colorScheme.secondary, fontWeight: FontWeight.w700)),
+    );
   }
 }

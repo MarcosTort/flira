@@ -17,7 +17,7 @@ class StoryMenuItem extends StatelessWidget {
             color: theme.colorScheme.outline,
             borderRadius: BorderRadius.circular(2),
           ),
-          child:  Icon(
+          child: Icon(
             Icons.bookmark,
             color: theme.colorScheme.secondary,
             size: 15,

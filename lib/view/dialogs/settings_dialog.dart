@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class SettingsDialog extends StatelessWidget {
   const SettingsDialog({
     super.key,
-     this.fromSettings = false,
+    this.fromSettings = false,
     this.message =
         'No projects found. Please check your api token and url. To get a new token, go to:\n',
   });
@@ -21,7 +21,7 @@ class SettingsDialog extends StatelessWidget {
           Text(
             message,
           ),
-           SelectableText(
+          SelectableText(
             katlassianUrl,
             style: TextStyle(color: theme.colorScheme.primary),
           ),
