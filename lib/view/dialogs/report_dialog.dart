@@ -223,7 +223,7 @@ class _AttachmentButton extends StatelessWidget {
             height: 20,
             width: 20,
             decoration: BoxDecoration(
-              color: theme.colorScheme.onError,
+              color: theme.colorScheme.error,
               shape: BoxShape.circle,
             ),
             child: Center(
