@@ -12,8 +12,9 @@ dependencies:
   file_picker: ^5.2.5
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.1
+  flutter_bloc: ^8.1.2
   flutter_secure_storage: ^7.0.1
+  graphql_flutter: ^5.1.2
   permission_handler: ^10.2.0
   screenshot_callback: ^2.0.3
   shake: ^2.2.0

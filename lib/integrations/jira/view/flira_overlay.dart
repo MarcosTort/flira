@@ -1,8 +1,9 @@
-import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flira/consts.dart';
-import 'package:flira/models/models.dart';
-import 'package:flira/view/dialogs/dialogs.dart';
-import 'package:flira/view/view.dart';
+import 'package:flira/flira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/models/models.dart';
+import 'package:flira/integrations/jira/view/dialogs/dialogs.dart';
+import 'package:flira/integrations/jira/view/view.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -74,7 +75,6 @@ class FliraOverlay extends StatelessWidget {
                   child: Navigator(
                     onGenerateRoute: (settings) => MaterialPageRoute(
                       builder: (context) => FloatingButton(
-                        fliraClient: fliraClient,
                       ),
                     ),
                   ),

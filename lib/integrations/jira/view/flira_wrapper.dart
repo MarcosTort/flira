@@ -1,17 +1,17 @@
 library flira;
 
-import 'package:flira/bloc/flira_bloc.dart';
-import 'package:flira/jira_repository/jira_repository.dart';
-import 'package:flira/models/models.dart';
-import 'package:flira/view/view.dart';
+import 'package:flira/integrations/jira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/jira_repository/jira_repository.dart';
+import 'package:flira/integrations/jira/models/models.dart';
+import 'package:flira/integrations/jira/view/view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// A widget that wraps a [MaterialApp] with custom theme, [FliraBloc], and [FliraOverlay].
+/// A widget that wraps a [MaterialApp] with custom theme, [JiraBloc], and [FliraOverlay].
 ///
 /// This widget is designed to be used as the top-level widget for a Flutter application.
 /// It accepts a [MaterialApp] as its child and wraps it with a [Theme], a [BlocProvider],
-/// and a [FliraOverlay] widget. The [FliraBloc] is created and provided to the app
+/// and a [FliraOverlay] widget. The [JiraBloc] is created and provided to the app
 /// via the [BlocProvider]. The [FliraOverlay] is used to display a widget on top of the app
 /// when a certain triggering method is invoked.
 class FliraWrapper extends StatelessWidget {
@@ -48,10 +48,12 @@ class FliraWrapper extends StatelessWidget {
         child: Stack(children: [
           app,
           BlocProvider(
-            create: (ctx) => FliraBloc(
-              jiraRepository: const JiraRepository(),
+            create: (ctx) => JiraBloc(
+              jiraPlatformApi: const JiraRepository(),
             )..add(
                 LoadCredentialsFromStorageEvent(),
+              )..add(
+                FliraTriggeredEvent(),
               ),
             child: FliraOverlay(
               triggeringMethod: triggeringMethod,

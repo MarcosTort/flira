@@ -1,5 +1,5 @@
-import 'package:flira/bloc/flira_bloc.dart';
-import 'package:flira/view/dialogs/dialogs.dart';
+import 'package:flira/integrations/jira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/view/dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:atlassian_apis/jira_platform.dart' hide Icon;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,13 +11,13 @@ class ReportBugDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<FliraBloc>();
+    final bloc = context.read<JiraBloc>();
     final projects = bloc.state.projects;
 
     final project =
-        context.select((FliraBloc value) => value.state.selectedProject);
+        context.select((JiraBloc value) => value.state.selectedProject);
     final isLoading = context
-        .select((FliraBloc value) => value.state.status == FliraStatus.loading);
+        .select((JiraBloc value) => value.state.status == JiraStatus.loading);
     return Dialog(
       child: SingleChildScrollView(
         child: Padding(
@@ -112,7 +112,7 @@ class ReportBugDialog extends StatelessWidget {
                 );
               }).whenComplete(() async => Future.delayed(
                 const Duration(microseconds: 100),
-                () => context.read<FliraBloc>().add(
+                () => context.read<JiraBloc>().add(
                       FliraButtonDraggedEvent(),
                     ),
               )),
@@ -147,9 +147,9 @@ class _Form extends StatelessWidget {
           TextField(
             onChanged: (value) {
               if (ticketFieldNames[index] == 'Summary') {
-                context.read<FliraBloc>().add(SummaryChanged(value));
+                context.read<JiraBloc>().add(SummaryChanged(value));
               } else if (ticketFieldNames[index] == 'Description') {
-                context.read<FliraBloc>().add(DescriptionChanged(value));
+                context.read<JiraBloc>().add(DescriptionChanged(value));
               }
             },
             decoration: InputDecoration(
@@ -171,9 +171,9 @@ class _ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final issue = context.select((FliraBloc value) => value.state.issue);
+    final issue = context.select((JiraBloc value) => value.state.issue);
     final isLoading = context
-        .select((FliraBloc value) => value.state.status == FliraStatus.loading);
+        .select((JiraBloc value) => value.state.status == JiraStatus.loading);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -188,7 +188,7 @@ class _ActionButtons extends StatelessWidget {
                   !isLoading
               ? null
               : () {
-                  context.read<FliraBloc>().add(const SubmitIssueRequested());
+                  context.read<JiraBloc>().add(const SubmitIssueRequested());
                 },
         ),
       ],
@@ -201,9 +201,9 @@ class _AttachmentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<FliraBloc>();
+    final bloc = context.read<JiraBloc>();
     final attachment =
-        context.select((FliraBloc value) => value.state.attachment);
+        context.select((JiraBloc value) => value.state.attachment);
     final theme = Theme.of(context);
     return Stack(
       children: [
@@ -246,7 +246,7 @@ class _IssueTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final issue = context.select((FliraBloc value) => value.state.issue);
+    final issue = context.select((JiraBloc value) => value.state.issue);
 
     return DropdownButton(
         borderRadius: BorderRadius.circular(10),
@@ -270,7 +270,7 @@ class _IssueTypeSelector extends StatelessWidget {
           ),
         ],
         onChanged: (value) {
-          context.read<FliraBloc>().add(IssueTypeChanged(value as String));
+          context.read<JiraBloc>().add(IssueTypeChanged(value as String));
         });
   }
 }
@@ -313,7 +313,7 @@ class _ProjectSelector extends StatelessWidget {
               )
               .toList(),
           onChanged: (value) {
-            context.read<FliraBloc>().add(ChangeProjectRequested(value!));
+            context.read<JiraBloc>().add(ChangeProjectRequested(value!));
           },
         ),
       ),
@@ -328,7 +328,7 @@ class SubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLoading = context
-        .select((FliraBloc bloc) => bloc.state.status == FliraStatus.loading);
+        .select((JiraBloc bloc) => bloc.state.status == JiraStatus.loading);
     return MaterialButton(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(6),

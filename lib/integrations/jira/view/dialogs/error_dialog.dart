@@ -1,4 +1,4 @@
-import 'package:flira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,7 +16,7 @@ class ErrorDialog extends StatelessWidget {
       actions: [
         TextButton(
             onPressed: () {
-              context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+              context.read<JiraBloc>().add(FliraButtonDraggedEvent());
               Navigator.pop(context);
             },
             child: const Text('Ok'))
@@ -29,6 +29,6 @@ class ErrorDialog extends StatelessWidget {
       barrierDismissible: false,
       context: context,
       builder: (context) => this,
-    ).then((value) => context.read<FliraBloc>().add(FliraButtonDraggedEvent()));
+    ).then((value) => context.read<JiraBloc>().add(FliraButtonDraggedEvent()));
   }
 }
