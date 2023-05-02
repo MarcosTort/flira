@@ -1,5 +1,6 @@
 import 'package:flira/consts.dart';
-import 'package:flira/integrations/jira/bloc/flira_bloc.dart';
+import 'package:flira/flira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/bloc/jira_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -60,7 +61,7 @@ class _ActionsButtons extends StatelessWidget {
         TextButton(
           onPressed: () {
             if (!fromSettings) {
-              context.read<JiraBloc>().add(FliraButtonDraggedEvent());
+              context.read<FliraBloc>().add(FliraButtonDraggedEvent());
             }
             Navigator.pop(context);
           },
@@ -68,14 +69,14 @@ class _ActionsButtons extends StatelessWidget {
         ),
         TextButton(
           onPressed: () async {
-            context.read<JiraBloc>().add(
+            context.read<FliraBloc>().add(
                   const AddCredentialsEvent(),
                 );
             await Future.delayed(const Duration(milliseconds: 200))
                 .whenComplete(() {
               Navigator.pop(context);
               if (!fromSettings) {
-                context.read<JiraBloc>().add(FliraButtonDraggedEvent());
+                context.read<FliraBloc>().add(FliraButtonDraggedEvent());
               }
             });
           },
@@ -94,8 +95,8 @@ class _ApiTokenField extends StatelessWidget {
     return TextFormField(
       obscureText: true,
       initialValue:
-          context.select((JiraBloc bloc) => bloc.state.atlassianApiToken),
-      onChanged: (value) => context.read<JiraBloc>().add(
+          context.select((FliraBloc bloc) => bloc.state.atlassianApiToken),
+      onChanged: (value) => context.read<FliraBloc>().add(
             TokenTextFieldOnChangedEvent(value),
           ),
       decoration: const InputDecoration(
@@ -112,8 +113,8 @@ class _EmailField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue:
-          context.select((JiraBloc bloc) => bloc.state.atlassianUser),
-      onChanged: (value) => context.read<JiraBloc>().add(
+          context.select((FliraBloc bloc) => bloc.state.atlassianUser),
+      onChanged: (value) => context.read<FliraBloc>().add(
             UserTextFieldOnChangedEvent(value),
           ),
       decoration: const InputDecoration(
@@ -130,8 +131,8 @@ class _ServerNameField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue:
-          context.select((JiraBloc bloc) => bloc.state.atlassianUrlPrefix),
-      onChanged: (value) => context.read<JiraBloc>().add(
+          context.select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
+      onChanged: (value) => context.read<FliraBloc>().add(
             UrlTextFieldOnChangedEvent(value),
           ),
       decoration: const InputDecoration(

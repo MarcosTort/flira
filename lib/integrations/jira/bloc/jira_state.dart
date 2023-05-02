@@ -1,4 +1,4 @@
-part of 'flira_bloc.dart';
+part of 'jira_bloc.dart';
 
 enum JiraStatus {
   initial,

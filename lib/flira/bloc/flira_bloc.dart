@@ -18,6 +18,12 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     on<InitialButtonTappedEvent>(_onInitialButtonTappedEvent);
     on<FliraTriggeredEvent>(_onFliraTriggeredEvent);
     on<FliraButtonDraggedEvent>(_onFliraButtonDraggedEvent);
+    on<LoadCredentialsFromStorageEvent>(_onLoadCredentialsFromStorageEvent);
+    on<AddCredentialsEvent>(_onAddCredentialsEvent);
+    on<TokenTextFieldOnChangedEvent>(_onTokenTextFieldOnChangedEvent);
+    on<UserTextFieldOnChangedEvent>(_onUserTextFieldOnChangedEvent);
+    on<UrlTextFieldOnChangedEvent>(_onUrlTextFieldOnChangedEvent);
+    
   }
   final storage = const FlutterSecureStorage();
   final JiraRepository _jiraRepository;
@@ -61,10 +67,9 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
       emit(state.copyWith(
         status: FliraStatus.initSuccess,
         jiraPlatformApi: jiraPlatformApi,
-        projects: projects,
-        selectedProject: projects.first,
+        
       ));
-    } on Exception catch (e) {
+    }  catch (e) {
       emit(state.copyWith(
         status: FliraStatus.failure,
       ));

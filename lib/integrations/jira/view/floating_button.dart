@@ -1,6 +1,6 @@
 import 'package:flira/consts.dart';
 import 'package:flira/flira/bloc/flira_bloc.dart';
-import 'package:flira/integrations/jira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/bloc/jira_bloc.dart';
 import 'package:flira/integrations/jira/view/dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,24 +14,25 @@ class FloatingButton extends StatelessWidget {
     return BlocListener<FliraBloc, FliraState>(
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
-        if (state.status == JiraStatus.fliraStarted) {
-          const ReportBugDialog().open(state.projects, context);
+        if (state.status == FliraStatus.fliraStarted) {
+          final projects = context.read<JiraBloc>().state.projects;
+          final jiraPlatformApi = context.read<JiraBloc>().state.jiraPlatformApi;
+          const JiraReportBugDialog().open(projects, context, jiraPlatformApi );
         }
         if (state.status == JiraStatus.ticketSubmittionError) {
-          ErrorDialog(
-            message: state.errorMessage,
+          const ErrorDialog(
+            message: ' ',
           ).open(context);
         }
         if (state.status == JiraStatus.ticketSubmittionSuccess) {
           const SuccessDialog().open(context);
         }
-        if (state.status == JiraStatus.initSuccess ||
-            state.status == JiraStatus.failure) {
+        if (state.status == FliraStatus.initSuccess ||
+            state.status == FliraStatus.failure) {
           context.read<FliraBloc>().add(InitialButtonTappedEvent());
         }
       },
-      child: BlocBuilder<JiraBloc, JiraState>(
-        
+      child: BlocBuilder<FliraBloc, FliraState>(
         builder: (context, state) {
           final theme = Theme.of(context);
           final width = state.initialButtonWidth;
@@ -46,7 +47,9 @@ class FloatingButton extends StatelessWidget {
                   context.read<FliraBloc>().add(FliraButtonDraggedEvent());
                 },
                 onTap: () async {
-                  context.read<FliraBloc>().add( const CreateJiraPlatformApiRequested());
+                  context
+                      .read<FliraBloc>()
+                      .add(const CreateJiraPlatformApiRequested());
                 },
                 child: Material(
                   shape: const CircleBorder(),
@@ -60,7 +63,7 @@ class FloatingButton extends StatelessWidget {
                     width: width,
                     height: height,
                     child: Center(
-                      child: state.status == JiraStatus.initial
+                      child: state.status == FliraStatus.initial
                           ? FittedBox(
                               child: Text(
                                 'Flira',

@@ -1,13 +1,14 @@
-import 'package:flira/integrations/jira/bloc/flira_bloc.dart';
+import 'package:flira/flira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/bloc/jira_bloc.dart';
 import 'package:flira/integrations/jira/view/dialogs/dialogs.dart';
 import 'package:flutter/material.dart';
-import 'package:atlassian_apis/jira_platform.dart' hide Icon;
+import 'package:atlassian_apis/jira_platform.dart' hide Icon, JiraStatus;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'widgets/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 
-class ReportBugDialog extends StatelessWidget {
-  const ReportBugDialog({super.key});
+class JiraReportBugDialog extends StatelessWidget {
+  const JiraReportBugDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +78,7 @@ class ReportBugDialog extends StatelessWidget {
     );
   }
 
-  Future<void> open(List<Project> projects, BuildContext context) async {
+  Future<void> open(List<Project> projects, BuildContext context, JiraPlatformApi? jiraPlatformApi) async {
     try {
       if (projects.isEmpty) {
         throw Exception;
@@ -89,30 +90,33 @@ class ReportBugDialog extends StatelessWidget {
               context: context,
               builder: (_) {
                 final theme = Theme.of(context);
-                return Stack(
-                  children: [
-                    this,
-                    Material(
-                      color: theme.colorScheme.onSurface,
-                      child: IconButton(
-                          onPressed: () {
-                            const SettingsDialog(
-                                    fromSettings: true,
-                                    message:
-                                        'Settings\n \nTo get a new token go to: \n')
-                                .open(context);
-                          },
-                          icon: Icon(
-                            Icons.settings,
-                            color: theme.colorScheme.secondary,
-                            size: 40,
-                          )),
-                    )
-                  ],
+                return BlocProvider(
+                  create: (context) => JiraBloc(jiraPlatformApi: jiraPlatformApi!),
+                  child: Stack(
+                    children: [
+                      this,
+                      Material(
+                        color: theme.colorScheme.onSurface,
+                        child: IconButton(
+                            onPressed: () {
+                              const SettingsDialog(
+                                      fromSettings: true,
+                                      message:
+                                          'Settings\n \nTo get a new token go to: \n')
+                                  .open(context);
+                            },
+                            icon: Icon(
+                              Icons.settings,
+                              color: theme.colorScheme.secondary,
+                              size: 40,
+                            )),
+                      )
+                    ],
+                  ),
                 );
               }).whenComplete(() async => Future.delayed(
                 const Duration(microseconds: 100),
-                () => context.read<JiraBloc>().add(
+                () => context.read<FliraBloc>().add(
                       FliraButtonDraggedEvent(),
                     ),
               )),

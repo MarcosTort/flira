@@ -8,8 +8,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 
 
-part 'flira_event.dart';
-part 'flira_state.dart';
+part 'jira_event.dart';
+part 'jira_state.dart';
 
 class JiraBloc extends Bloc<JiraEvent, JiraState> {
   JiraBloc({

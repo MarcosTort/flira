@@ -1,6 +1,7 @@
 library flira;
 
-import 'package:flira/integrations/jira/bloc/flira_bloc.dart';
+import 'package:flira/flira/bloc/flira_bloc.dart';
+import 'package:flira/integrations/jira/bloc/jira_bloc.dart';
 import 'package:flira/integrations/jira/jira_repository/jira_repository.dart';
 import 'package:flira/integrations/jira/models/models.dart';
 import 'package:flira/integrations/jira/view/view.dart';
@@ -47,16 +48,23 @@ class FliraWrapper extends StatelessWidget {
         textDirection: TextDirection.ltr,
         child: Stack(children: [
           app,
-          BlocProvider(
-            create: (ctx) => JiraBloc(
-              jiraPlatformApi: const JiraRepository(),
-            )..add(
-                LoadCredentialsFromStorageEvent(),
-              )..add(
-                FliraTriggeredEvent(),
+          RepositoryProvider(
+            lazy: false,
+            create: (context) => const JiraRepository(),
+            child: BlocProvider(
+              lazy: false,
+              create: (ctx) => FliraBloc(
+                jiraRepository: ctx.read<JiraRepository>(),
+              )
+                ..add(
+                  LoadCredentialsFromStorageEvent(),
+                )
+                ..add(
+                  FliraTriggeredEvent(),
+                ),
+              child: FliraOverlay(
+                triggeringMethod: triggeringMethod,
               ),
-            child: FliraOverlay(
-              triggeringMethod: triggeringMethod,
             ),
           )
         ]),

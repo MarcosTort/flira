@@ -1,7 +1,6 @@
 import 'package:flira/consts.dart';
 import 'package:flira/flira/bloc/flira_bloc.dart';
 import 'package:flira/integrations/jira/models/models.dart';
-import 'package:flira/integrations/jira/view/dialogs/dialogs.dart';
 import 'package:flira/integrations/jira/view/view.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -24,7 +23,7 @@ class FliraOverlay extends StatelessWidget {
     final reportDialogOpen =
         context.select((FliraBloc value) => value.state.reportDialogOpen);
     final canTriggerDialog = !reportDialogOpen;
-    ReportBugDialog fliraClient = const ReportBugDialog();
+    // JiraReportBugDialog fliraClient = const JiraReportBugDialog();
     if (triggeringMethod == TriggeringMethod.screenshot) {
       final screenshotCallback = ScreenshotCallback();
 
@@ -74,7 +73,7 @@ class FliraOverlay extends StatelessWidget {
                   color: theme.colorScheme.onSurface,
                   child: Navigator(
                     onGenerateRoute: (settings) => MaterialPageRoute(
-                      builder: (context) => FloatingButton(
+                      builder: (context) => const FloatingButton(
                       ),
                     ),
                   ),
