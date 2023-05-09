@@ -49,3 +49,7 @@
 * Bugfix
 ### [0.3.23] 06 February 2023
 * Updated dependencies
+### [0.4.0] 28 March 2023
+* Refactor
+### [0.3.23] 06 February 2023
+* Roll back to old version due to functional bugs
