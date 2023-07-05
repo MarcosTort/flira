@@ -97,7 +97,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                 padding: const EdgeInsets.all(10.0),
                                 child: Text(e.name ?? '',
                                     style:
-                                        Theme.of(context).textTheme.bodyText1),
+                                        Theme.of(context).textTheme.bodyLarge),
                               ),
                             ),
                           )
@@ -122,7 +122,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(e,
-                                style: Theme.of(context).textTheme.subtitle1),
+                                style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(
                               height: 5,
                             ),
@@ -225,7 +225,6 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                   children: [
                     MaterialButton(
                         onPressed: () async {
-                          
                           Navigator.pop(context);
                         },
                         child: const Text('Cancel')),
@@ -304,8 +303,8 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                         TextButton(
                                           onPressed: () {
                                             setState(() {
-                                _attachment = null;
-                              });
+                                              _attachment = null;
+                                            });
                                             Navigator.pop(context);
                                           },
                                           child: const Text('Yes'),
@@ -334,10 +333,9 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                       'file', _attachment!.paths.first!,
                                       filename: _attachment!.names.first);
 
-                               jiraPlatformApi.issueAttachments
-                                  .addAttachment(
-                                      issueIdOrKey: send.id ?? '',
-                                      file: multiPartFile);
+                              jiraPlatformApi.issueAttachments.addAttachment(
+                                  issueIdOrKey: send.id ?? '',
+                                  file: multiPartFile);
                               // setState(() {
                               //   _attachment = null;
                               // });

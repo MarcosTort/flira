@@ -53,3 +53,5 @@
 * Refactor
 ### [0.3.23] 06 February 2023
 * Roll back to old version due to functional bugs
+### [0.3.24] 05 July 2023
+* Fix
