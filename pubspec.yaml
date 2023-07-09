@@ -7,6 +7,8 @@ environment:
   flutter: 3.10.3
 dependencies:
   atlassian_apis: ^0.11.0
+  device_info: ^2.0.3
+  device_information: ^0.0.4
   equatable: ^2.0.5
   file_picker: ^5.2.5
   flutter:
@@ -14,8 +16,6 @@ dependencies:
   flutter_bloc: ^8.1.1
   flutter_secure_storage: ^7.0.1
   permission_handler: ^10.2.0
-  screenshot_callback: ^2.0.3
-  shake: ^2.2.0  
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -19,6 +19,9 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     on<UserTextFieldOnChangedEvent>(_onUserTextFieldOnChangedEvent);
     on<UrlTextFieldOnChangedEvent>(_onUrlTextFieldOnChangedEvent);
     on<LoadCredentialsFromStorageEvent>(_onLoadCredentialsFromStorageEvent);
+    on<InitialButtonExpandedEvent>(_onInitialButtonExpandedEvent);
+
+    on<CollapseInitialButtonEvent>(_onCollapseInitialButtonEvent);
   }
   final storage = const FlutterSecureStorage();
 
@@ -37,8 +40,30 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     emit(state.copyWith(atlassianUrlPrefix: event.text));
   }
 
+  void _onInitialButtonExpandedEvent(
+      InitialButtonExpandedEvent event, Emitter<FliraState> emit) {
+    emit(state.copyWith(
+      initialButtonWidth: 100,
+      materialAppWidth: 100,
+      buttonStatus: ButtonStatus.expanded,
+    ));
+  }
+
+  void _onCollapseInitialButtonEvent(
+      CollapseInitialButtonEvent event, Emitter<FliraState> emit) {
+    emit(state.copyWith(
+      initialButtonWidth: 10,
+      materialAppWidth: 10,
+      buttonStatus: ButtonStatus.collapsed,
+    ));
+  }
+
   Future<void> _onInitialButtonTappedEvent(
       InitialButtonTappedEvent event, Emitter<FliraState> emit) async {
+    emit(state.copyWith(
+      buttonStatus: ButtonStatus.window,
+    ));
+    await Future.delayed(const Duration(microseconds: 500));
     emit(state.copyWith(
       materialAppHeight: 1000,
       materialAppWidth: 1000,
@@ -47,8 +72,8 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
     ));
     await Future.delayed(const Duration(seconds: 1));
     emit(state.copyWith(
-      initialButtonHeight: 0,
-      initialButtonWidth: 0,
+      initialButtonHeight: 100,
+      initialButtonWidth: 10,
       status: FliraStatus.initial,
     ));
   }
@@ -66,11 +91,15 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
   Future<void> _onFliraButtonDraggedEvent(
       FliraButtonDraggedEvent event, Emitter<FliraState> emit) async {
     emit(state.copyWith(
-      initialButtonWidth: 0,
-      initialButtonHeight: 0,
-      materialAppHeight: 0,
-      materialAppWidth: 0,
+      initialButtonWidth: 10,
+      initialButtonHeight: 100,
+      materialAppHeight: 100,
+      materialAppWidth: 10,
       reportDialogOpen: false,
+    ));
+    await Future.delayed(const Duration(seconds: 1));
+    emit(state.copyWith(
+      buttonStatus: ButtonStatus.collapsed,
     ));
   }
 

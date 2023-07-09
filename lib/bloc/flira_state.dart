@@ -6,6 +6,11 @@ enum FliraStatus {
   success,
   failure,
 }
+enum ButtonStatus {
+  expanded,
+  collapsed,
+  window
+}
 
 class FliraState extends Equatable {
   const FliraState({
@@ -21,16 +26,19 @@ class FliraState extends Equatable {
     this.atlassianUrlPrefix,
     required this.triggeringMethod,
     this.reportDialogOpen = false,
+    required this.buttonStatus,
   });
   const FliraState.initial()
       : this(
-            materialAppHeight: 0,
-            materialAppWidth: 0,
-            initialButtonHeight: 0,
-            initialButtonWidth: 0,
-            alignment: Alignment.bottomRight,
-            status: FliraStatus.initial,
-            triggeringMethod: TriggeringMethod.none);
+          materialAppHeight: 100,
+          materialAppWidth: 10,
+          initialButtonHeight: 100,
+          initialButtonWidth: 10,
+          alignment: Alignment.centerLeft,
+          status: FliraStatus.initial,
+          triggeringMethod: TriggeringMethod.none,
+          buttonStatus: ButtonStatus.collapsed,
+        );
   final double? materialAppWidth;
   final double? materialAppHeight;
   final double? initialButtonWidth;
@@ -43,6 +51,7 @@ class FliraState extends Equatable {
   final String? atlassianUser;
   final String? atlassianUrlPrefix;
   final bool reportDialogOpen;
+  final ButtonStatus buttonStatus;
 
   FliraState copyWith({
     double? materialAppWidth,
@@ -57,6 +66,7 @@ class FliraState extends Equatable {
     String? atlassianUser,
     String? atlassianUrlPrefix,
     bool? reportDialogOpen,
+    ButtonStatus? buttonStatus,
   }) {
     return FliraState(
       materialAppWidth: materialAppWidth ?? this.materialAppWidth,
@@ -71,6 +81,7 @@ class FliraState extends Equatable {
       atlassianUser: atlassianUser ?? this.atlassianUser,
       atlassianUrlPrefix: atlassianUrlPrefix ?? this.atlassianUrlPrefix,
       reportDialogOpen: reportDialogOpen ?? this.reportDialogOpen,
+      buttonStatus: buttonStatus ?? this.buttonStatus,
     );
   }
 
@@ -88,5 +99,6 @@ class FliraState extends Equatable {
         atlassianUser,
         atlassianUrlPrefix,
         reportDialogOpen,
+        buttonStatus,
       ];
 }

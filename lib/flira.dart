@@ -41,144 +41,141 @@ class Flira {
   /// This void function will show the report dialog in which we can report our issues
 
   Future<void> displayReportDialog(BuildContext context) async {
-    try {
-      final state = context.read<FliraBloc>().state;
-      final url = state.atlassianUrlPrefix;
-      final apiToken = state.atlassianApiToken;
-      final user = state.atlassianUser;
-      final apiClient =
-          await _getApiClient(url ?? '', user ?? '', apiToken ?? '');
-
-      final jiraPlatformApi = await _getJiraPlatformApi(apiClient);
-
-      /// Here we get the projects of the current atlassianUrl
-      final projects = await jiraPlatformApi.projects.getAllProjects();
-      if (projects.isEmpty) {
-        throw Exception;
-      } else {
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          () => showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) => Stack(
-              children: [
-                ReportBugDialog(
-                    projects: projects, jiraPlatformApi: jiraPlatformApi),
-                Material(
-                  color: Colors.transparent,
-                  child: IconButton(
-                      onPressed: () {
-                        settingsDialog(context,
-                            fromSettings: true,
-                            message:
-                                'Settings\n \nTo get a new token go to: \n');
-                      },
-                      icon: const Icon(
-                        Icons.settings,
-                        color: Colors.white,
-                        size: 40,
-                      )),
-                )
-              ],
-            ),
-          ).whenComplete(() async => Future.delayed(
-                const Duration(microseconds: 100),
-                () => context.read<FliraBloc>().add(
-                      FliraButtonDraggedEvent(),
-                    ),
-              )),
-        );
-      }
-    } on Exception {
-      settingsDialog(context);
+    final state = context.read<FliraBloc>().state;
+    final url = state.atlassianUrlPrefix;
+    final apiToken = state.atlassianApiToken;
+    final user = state.atlassianUser;
+    final apiClient = await _getApiClient(
+      (url ?? '').trim(),
+      (user ?? '').trim(),
+      (apiToken ?? '').trim(),
+    );
+    final jiraPlatformApi = await _getJiraPlatformApi(apiClient);
+    /// Here we get the projects of the current atlassianUrl
+    final projects = await jiraPlatformApi.projects.getAllProjects();
+    if (projects.isEmpty) {
+      Future.delayed(
+          const Duration(milliseconds: 500), () => settingsDialog(context));
+    } else {
+      Future.delayed(
+        const Duration(milliseconds: 500),
+        () => showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) => Stack(
+            children: [
+              ReportBugDialog(
+                  projects: projects, jiraPlatformApi: jiraPlatformApi),
+              Material(
+                color: Colors.transparent,
+                child: IconButton(
+                    onPressed: () {
+                      settingsDialog(context,
+                          fromSettings: true,
+                          message: 'Settings\n \nTo get a new token go to: \n');
+                    },
+                    icon: const Icon(
+                      Icons.settings,
+                      color: Colors.white,
+                      size: 40,
+                    )),
+              )
+            ],
+          ),
+        ).whenComplete(() async => Future.delayed(
+              const Duration(microseconds: 100),
+              () => context.read<FliraBloc>().add(
+                    FliraButtonDraggedEvent(),
+                  ),
+            )),
+      );
     }
   }
+}
 
-  Future<dynamic> settingsDialog(BuildContext context,
-      {bool fromSettings = false,
-      String message =
-          'No projects found. Please check your api token and url. To get a new token, go to:\n'}) {
-    return showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Column(
-          children: [
-            Text(
-              message,
-            ),
-            const SelectableText(
-              'https://id.atlassian.com/manage-profile/security/api-tokens',
-              style: TextStyle(color: Colors.blue),
-            ),
-          ],
+Future<dynamic> settingsDialog(BuildContext context,
+    {bool fromSettings = false,
+    String message =
+        'No projects found. Please check your api token and url. To get a new token, go to:\n'}) {
+  return showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Column(
+        children: [
+          Text(
+            message,
+          ),
+          const SelectableText(
+            'https://id.atlassian.com/manage-profile/security/api-tokens',
+            style: TextStyle(color: Colors.blue),
+          ),
+        ],
+      ),
+      actions: [
+        TextFormField(
+          initialValue:
+              context.select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
+          onChanged: (value) => context.read<FliraBloc>().add(
+                UrlTextFieldOnChangedEvent(value),
+              ),
+          decoration: const InputDecoration(
+            hintText: 'Enter your jira server name',
+          ),
         ),
-        actions: [
-          TextFormField(
-            initialValue: context
-                .select((FliraBloc bloc) => bloc.state.atlassianUrlPrefix),
-            onChanged: (value) => context.read<FliraBloc>().add(
-                  UrlTextFieldOnChangedEvent(value),
-                ),
-            decoration: const InputDecoration(
-              hintText: 'Enter your jira server name',
-            ),
+        TextFormField(
+          initialValue:
+              context.select((FliraBloc bloc) => bloc.state.atlassianUser),
+          onChanged: (value) => context.read<FliraBloc>().add(
+                UserTextFieldOnChangedEvent(value),
+              ),
+          decoration: const InputDecoration(
+            hintText: 'Enter your jira user email',
           ),
-          TextFormField(
-            initialValue:
-                context.select((FliraBloc bloc) => bloc.state.atlassianUser),
-            onChanged: (value) => context.read<FliraBloc>().add(
-                  UserTextFieldOnChangedEvent(value),
-                ),
-            decoration: const InputDecoration(
-              hintText: 'Enter your jira user email',
-            ),
+        ),
+        TextFormField(
+          obscureText: true,
+          initialValue:
+              context.select((FliraBloc bloc) => bloc.state.atlassianApiToken),
+          onChanged: (value) => context.read<FliraBloc>().add(
+                TokenTextFieldOnChangedEvent(value),
+              ),
+          decoration: const InputDecoration(
+            hintText: 'Enter your api token',
           ),
-          TextFormField(
-            obscureText: true,
-            initialValue: context
-                .select((FliraBloc bloc) => bloc.state.atlassianApiToken),
-            onChanged: (value) => context.read<FliraBloc>().add(
-                  TokenTextFieldOnChangedEvent(value),
-                ),
-            decoration: const InputDecoration(
-              hintText: 'Enter your api token',
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TextButton(
+              onPressed: () {
+                if (!fromSettings) {
+                  context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+                }
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
-                onPressed: () {
+            TextButton(
+              onPressed: () async {
+                context.read<FliraBloc>().add(
+                      const AddCredentialsEvent(),
+                    );
+                await Future.delayed(const Duration(milliseconds: 200))
+                    .whenComplete(() {
+                  Navigator.pop(context);
                   if (!fromSettings) {
                     context.read<FliraBloc>().add(FliraButtonDraggedEvent());
                   }
-                  Navigator.pop(context);
-                },
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  context.read<FliraBloc>().add(
-                        const AddCredentialsEvent(),
-                      );
-                  await Future.delayed(const Duration(milliseconds: 200))
-                      .whenComplete(() {
-                    Navigator.pop(context);
-                    if (!fromSettings) {
-                      context.read<FliraBloc>().add(FliraButtonDraggedEvent());
-                    }
-                  });
-                },
-                child: const Text('Ok'),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
+                });
+              },
+              child: const Text('Ok'),
+            ),
+          ],
+        )
+      ],
+    ),
+  );
 }
 
 class FliraWrapper extends StatelessWidget {
@@ -218,6 +215,7 @@ enum TriggeringMethod {
   screenshot,
   shaking,
   none,
+  byTouch,
 }
 
 const curve = Curves.linearToEaseOut;

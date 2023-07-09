@@ -11,6 +11,17 @@ class InitialButtonTappedEvent extends FliraEvent {
   List<Object?> get props => [];
 }
 
+class InitialButtonExpandedEvent extends FliraEvent {
+  const InitialButtonExpandedEvent();
+  @override
+  List<Object?> get props => [
+      ];
+}
+class CollapseInitialButtonEvent extends FliraEvent {
+  @override
+  List<Object?> get props => [];
+}
+
 class FliraTriggeredEvent extends FliraEvent {
   @override
   List<Object?> get props => [];

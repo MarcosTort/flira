@@ -28,7 +28,8 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
   late _Issue _issue;
   late FilePickerResult? _attachment;
   @override
-  void initState() {
+  void initState()  {
+    
     /// Set the initial project and issue
     _attachment = const FilePickerResult([]);
     _project = projects.first;
@@ -256,7 +257,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
                                           {
                                             "type": "text",
                                             "text":
-                                                'Reported using Flira\n\n${_issue.description}',
+                                                'Reported using Flira\n\n${_issue.description}\n ${_issue.environment}',
                                           }
                                         ]
                                       }
@@ -359,19 +360,22 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
 }
 
 class _Issue {
-  const _Issue(
-      {this.projectKey,
-      this.name,
-      this.description,
-      this.issueType,
-      this.status,
-      this.project});
+  const _Issue({
+    this.projectKey,
+    this.name,
+    this.description,
+    this.issueType,
+    this.status,
+    this.project,
+    this.environment,
+  });
   final String? projectKey;
   final String? name;
   final String? description;
   final String? issueType;
   final String? status;
   final j.Project? project;
+  final String? environment;
 
   _Issue copyWith({
     String? projectKey,
@@ -379,6 +383,7 @@ class _Issue {
     String? description,
     String? issueType,
     String? status,
+    String? environment,
     j.Project? project,
   }) {
     return _Issue(
@@ -388,6 +393,8 @@ class _Issue {
       issueType: issueType ?? this.issueType,
       status: status ?? this.status,
       project: project ?? this.project,
+      environment: environment ?? this.environment,
     );
   }
+
 }
