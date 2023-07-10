@@ -15,7 +15,6 @@ class FliraOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Flira fliraClient = Flira();
-  
 
     return BlocBuilder<FliraBloc, FliraState>(
       builder: (context, state) {
@@ -32,7 +31,7 @@ class FliraOverlay extends StatelessWidget {
             width: width,
             height: height,
             child: Localizations(
-              delegates:  const [
+              delegates: const [
                 DefaultMaterialLocalizations.delegate,
                 DefaultWidgetsLocalizations.delegate,
                 DefaultCupertinoLocalizations.delegate,
@@ -44,8 +43,9 @@ class FliraOverlay extends StatelessWidget {
                   color: Colors.transparent,
                   child: Navigator(
                     onGenerateRoute: (settings) => MaterialPageRoute(
-                      builder: (context) =>
-                          _SideButton(fliraClient: fliraClient),
+                      builder: (context) => _SideButton(
+                        fliraClient: fliraClient,
+                      ),
                     ),
                   ),
                 ),
