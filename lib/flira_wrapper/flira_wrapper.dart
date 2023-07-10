@@ -157,6 +157,7 @@ class _SideButton extends StatelessWidget {
                 }
               },
               child: Material(
+                color: Colors.transparent,
                 child: AnimatedContainer(
                   curve: curve,
                   decoration: BoxDecoration(

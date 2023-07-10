@@ -57,3 +57,7 @@
 * Fix
 ### [0.5.0] 10 July 2023
 * Removed the shake and screenshot callback dependencies. Updated example
+### [0.5.1] 10 July 2023
+* Changed dependencies versions
+### [0.5.2] 10 July 2023
+* Color fix
