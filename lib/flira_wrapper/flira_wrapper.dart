@@ -58,72 +58,72 @@ class FliraOverlay extends StatelessWidget {
   }
 }
 
-class _FloatingButton extends StatelessWidget {
-  const _FloatingButton({
-    Key? key,
-    required this.fliraClient,
-  }) : super(key: key);
-  final Flira fliraClient;
-  @override
-  Widget build(BuildContext ctx) {
-    return BlocBuilder<FliraBloc, FliraState>(
-      builder: (context, state) {
-        final width = state.initialButtonWidth;
-        final height = state.initialButtonHeight;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: AnimatedAlign(
-            duration: const Duration(milliseconds: 450),
-            alignment: Alignment.center,
-            child: GestureDetector(
-              onVerticalDragStart: (details) {
-                context.read<FliraBloc>().add(FliraButtonDraggedEvent());
-              },
-              onTap: () async {
-                ctx.read<FliraBloc>().add(InitialButtonTappedEvent());
-                fliraClient.displayReportDialog(ctx);
-              },
-              child: Material(
-                shape: const CircleBorder(),
-                child: AnimatedContainer(
-                  curve: curve,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color.fromARGB(
-                      255,
-                      7,
-                      85,
-                      210,
-                    ),
-                  ),
-                  duration: const Duration(milliseconds: 400),
-                  width: width,
-                  height: height,
-                  child: Center(
-                    child: state.status == FliraStatus.initial
-                        ? const FittedBox(
-                            child: Text(
-                              'Flira',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          )
-                        : const CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
+// class _FloatingButton extends StatelessWidget {
+//   const _FloatingButton({
+//     Key? key,
+//     required this.fliraClient,
+//   }) : super(key: key);
+//   final Flira fliraClient;
+//   @override
+//   Widget build(BuildContext ctx) {
+//     return BlocBuilder<FliraBloc, FliraState>(
+//       builder: (context, state) {
+//         final width = state.initialButtonWidth;
+//         final height = state.initialButtonHeight;
+//         return Padding(
+//           padding: const EdgeInsets.only(bottom: 20),
+//           child: AnimatedAlign(
+//             duration: const Duration(milliseconds: 450),
+//             alignment: Alignment.center,
+//             child: GestureDetector(
+//               onVerticalDragStart: (details) {
+//                 context.read<FliraBloc>().add(FliraButtonDraggedEvent());
+//               },
+//               onTap: () async {
+//                 ctx.read<FliraBloc>().add(InitialButtonTappedEvent());
+//                 fliraClient.displayReportDialog(ctx);
+//               },
+//               child: Material(
+//                 shape: const CircleBorder(),
+//                 child: AnimatedContainer(
+//                   curve: curve,
+//                   decoration: const BoxDecoration(
+//                     shape: BoxShape.circle,
+//                     color: Color.fromARGB(
+//                       255,
+//                       7,
+//                       85,
+//                       210,
+//                     ),
+//                   ),
+//                   duration: const Duration(milliseconds: 400),
+//                   width: width,
+//                   height: height,
+//                   child: Center(
+//                     child: state.status == FliraStatus.initial
+//                         ? const FittedBox(
+//                             child: Text(
+//                               'Flira',
+//                               style: TextStyle(
+//                                 color: Colors.white,
+//                                 fontSize: 20,
+//                                 fontWeight: FontWeight.w700,
+//                               ),
+//                             ),
+//                           )
+//                         : const CircularProgressIndicator(
+//                             color: Colors.white,
+//                           ),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }
 
 class _SideButton extends StatelessWidget {
   const _SideButton({

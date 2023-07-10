@@ -55,3 +55,5 @@
 * Roll back to old version due to functional bugs
 ### [0.3.24] 05 July 2023
 * Fix
+### [0.5.0] 10 July 2023
+* Removed the shake and screenshot callback dependencies. Updated example

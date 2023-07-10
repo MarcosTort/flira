@@ -28,8 +28,7 @@ class _ReportBugDialogState extends State<ReportBugDialog> {
   late _Issue _issue;
   late FilePickerResult? _attachment;
   @override
-  void initState()  {
-    
+  void initState() {
     /// Set the initial project and issue
     _attachment = const FilePickerResult([]);
     _project = projects.first;
@@ -396,5 +395,4 @@ class _Issue {
       environment: environment ?? this.environment,
     );
   }
-
 }

@@ -32,5 +32,8 @@ FliraWrapper(
 ```
 
 FliraWrapper can be applied to <b>MaterialApp</b> and <b>MaterialApp.router()</b> as well.
+
+# Update
+Due to some issues related to screenshot callback, I added a floating button at the left edge of the screen to make it work on all devices. 
 ### Code example repository
 [Code example](https://github.com/MarcosTort/flira) feature/attach_image_to_issue (Current release)
