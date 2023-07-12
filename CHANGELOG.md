@@ -61,3 +61,5 @@
 * Changed dependencies versions
 ### [0.5.2] 10 July 2023
 * Color fix
+### [0.5.3] 10 July 2023
+*  fix

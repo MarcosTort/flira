@@ -1,6 +1,6 @@
 name: flira
 description: A tool to report Jira issues from any flutter-app. It can be activated by shaking the phone or taking a screenshot.
-version: 0.5.2
+version: 0.5.3
 homepage: https://github.com/MarcosTort/flira
 environment:
   sdk: ">=3.0.0 <4.0.0"
