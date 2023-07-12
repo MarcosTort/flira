@@ -24,12 +24,19 @@
 @import permission_handler_apple;
 #endif
 
+#if __has_include(<sensors_plus/FLTSensorsPlusPlugin.h>)
+#import <sensors_plus/FLTSensorsPlusPlugin.h>
+#else
+@import sensors_plus;
+#endif
+
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
   [FilePickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FilePickerPlugin"]];
   [FlutterSecureStoragePlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterSecureStoragePlugin"]];
   [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];
+  [FLTSensorsPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTSensorsPlusPlugin"]];
 }
 
 @end

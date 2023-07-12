@@ -9,6 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FliraWrapper(
+      triggeringMethod: TriggeringMethod.shaking,
       context: context,
       app: MaterialApp(
         title: 'Welcome to Flutter',

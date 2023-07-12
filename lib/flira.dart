@@ -62,7 +62,9 @@ class Flira {
         Future.delayed(
           const Duration(milliseconds: 500),
           () => showDialog(
+
             barrierDismissible: false,
+
             context: context,
             builder: (context) => Stack(
               children: [
@@ -109,16 +111,18 @@ Future<dynamic> settingsDialog(BuildContext context,
     barrierDismissible: false,
     context: context,
     builder: (context) => AlertDialog(
-      title: Column(
-        children: [
-          Text(
-            message,
-          ),
-          const SelectableText(
-            'https://id.atlassian.com/manage-profile/security/api-tokens',
-            style: TextStyle(color: Colors.blue),
-          ),
-        ],
+      title: SingleChildScrollView(
+        child: Column(
+          children: [
+            Text(
+              message,
+            ),
+            const SelectableText(
+              'https://id.atlassian.com/manage-profile/security/api-tokens',
+              style: TextStyle(color: Colors.blue),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextFormField(

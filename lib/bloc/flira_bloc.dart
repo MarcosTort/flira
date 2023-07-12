@@ -85,6 +85,7 @@ class FliraBloc extends Bloc<FliraEvent, FliraState> {
       initialButtonHeight: 100,
       materialAppHeight: 100,
       materialAppWidth: 100,
+      buttonStatus: ButtonStatus.expanded,
     ));
   }
 
