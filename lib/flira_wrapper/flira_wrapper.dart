@@ -21,7 +21,7 @@ class FliraOverlay extends StatelessWidget {
       ShakeDetector.autoStart(
         shakeSlopTimeMS: 100,
         minimumShakeCount: 1,
-        shakeThresholdGravity: 1.5,
+        shakeThresholdGravity: 2.5,
         onPhoneShake: () {
           if (canTriggerDialog) {
             context.read<FliraBloc>().add(FliraTriggeredEvent());
