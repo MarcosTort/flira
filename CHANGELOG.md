@@ -65,3 +65,5 @@
 *  fix
 ### [0.5.4] 12 July 2023
 *  fix
+### [0.5.5] 12 July 2023
+*  increased gravity parameter
