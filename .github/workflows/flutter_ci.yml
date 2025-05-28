@@ -1,33 +1,26 @@
-# .github/workflows/pr-review-selfhosted.yml
-name: AI PR Review (Self-hosted)
+name: AI Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
 
 jobs:
   ai-review:
-    runs-on: self-hosted  # Tu máquina local
-    
+    runs-on: self-hosted
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        
-    - name: Setup Python Environment
-      run: |
-        # Activar entorno virtual existente
-        source ~/ai-review-env/bin/activate
-        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
-        echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
-        
-    - name: Run AI Code Review
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PR_NUMBER: ${{ github.event.number }}
-        REPO_NAME: ${{ github.repository }}
-        BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        MODEL_PATH: "/home/user/models/llama-2-7b-chat"  # Ruta local del modelo
-      run: python scripts/local_ai_review.py
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up environment variables
+        run: |
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          echo "REPO_NAME=${{ github.repository }}" >> $GITHUB_ENV
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
+      - name: Run AI Review
+        run: |
+          # Ejecutar el script desde el runner
+          cd $HOME/actions-runner
+          python3 $HOME/actions-runner/scripts/local_ai_review.py
