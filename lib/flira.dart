@@ -62,9 +62,7 @@ class Flira {
         Future.delayed(
           const Duration(milliseconds: 500),
           () => showDialog(
-
             barrierDismissible: false,
-
             context: context,
             builder: (context) => Stack(
               children: [

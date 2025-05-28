@@ -6,11 +6,8 @@ enum FliraStatus {
   success,
   failure,
 }
-enum ButtonStatus {
-  expanded,
-  collapsed,
-  window
-}
+
+enum ButtonStatus { expanded, collapsed, window }
 
 class FliraState extends Equatable {
   const FliraState({
