@@ -20,6 +20,6 @@ jobs:
 
       - name: Run AI Review
         run: |
-          # Ejecutar el script desde el runner
+          # Ejecutar el script shell desde el runner
           cd $HOME/actions-runner
-          python3 $HOME/actions-runner/scripts/local_ai_review.py
+          ./run_ai_review.sh ${{ github.event.pull_request.number }} ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
