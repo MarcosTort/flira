@@ -2,8 +2,7 @@
 name: AI PR Review
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  
 
 jobs:
   ai-review:
