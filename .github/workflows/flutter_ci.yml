@@ -1,12 +1,13 @@
-# .github/workflows/pr-review.yml
-name: AI PR Review
+# .github/workflows/pr-review-selfhosted.yml
+name: AI PR Review (Self-hosted)
 
 on:
-  
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   ai-review:
-    runs-on: self-hosted
+    runs-on: self-hosted  # Tu máquina local
     
     steps:
     - name: Checkout code
@@ -14,32 +15,19 @@ jobs:
       with:
         fetch-depth: 0
         
-    - name: Setup Environment
+    - name: Setup Python Environment
       run: |
-        source $HOME/ai-review-env/bin/activate
-        echo "PATH=$HOME/ai-review-env/bin:$PATH" >> $GITHUB_ENV
-        
-    - name: Ensure Ollama is running
-      run: |
-        # Verificar si Ollama está corriendo
-        if ! pgrep -x "ollama" > /dev/null; then
-          echo "Starting Ollama..."
-          ollama serve &
-          sleep 10
-        fi
-        
-    - name: Install dependencies
-      run: |
-        source $HOME/ai-review-env/bin/activate
-        pip install -r requirements.txt
+        # Activar entorno virtual existente
+        source ~/ai-review-env/bin/activate
+        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+        echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
         
     - name: Run AI Code Review
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PR_NUMBER: ${{ github.event.number }}
         REPO_NAME: ${{ github.repository }}
-        OLLAMA_HOST: "http://localhost:8080"
-        OLLAMA_MODEL: "llama2:7b-chat"
-      run: |
-        source $HOME/ai-review-env/bin/activate
-        python scripts/ollama_ai_review.py
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        MODEL_PATH: "/home/user/models/llama-2-7b-chat"  # Ruta local del modelo
+      run: python scripts/local_ai_review.py
