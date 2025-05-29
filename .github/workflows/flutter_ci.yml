@@ -1,14 +1,15 @@
-# .github/workflows/ai-code-review.yml
-name: 🤖 AI Code Review
+# .github/workflows/ai-code-review-fixed.yml
+name: 🤖 AI Code Review (Fixed)
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
     # Exclude draft PRs to save resources
-    # paths-ignore:
-    #   - '**.md'
-    #   - 'docs/**'
-    #   - '.github/**'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/workflows/**'
+      - 'README*'
 
 # Ensure only one review runs at a time per PR
 concurrency:
@@ -57,7 +58,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       
       - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5  # Updated to v5
         with:
           python-version: '3.9'
           cache: 'pip'
@@ -75,6 +76,7 @@ jobs:
           echo "Runner Name: $RUNNER_NAME"
           echo "Runner OS: $RUNNER_OS"
           echo "Runner Architecture: $RUNNER_ARCH"
+          echo "Runner Version: $(cat /opt/actions-runner/.runner 2>/dev/null | jq -r '.agentVersion' 2>/dev/null || echo 'Unknown')"
           echo "Available CPUs: $(nproc)"
           echo "Available Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
           echo "Available Disk: $(df -h / | tail -1 | awk '{print $4}')"
@@ -144,8 +146,20 @@ jobs:
             export PYTHONVERBOSE=1
           fi
           
-          # Run the enhanced AI review
-          python scripts/runner_optimized_ai_review.py
+          # Check if enhanced script exists, fallback to original if not
+          if [ -f "scripts/runner_optimized_ai_review.py" ]; then
+            echo "🚀 Using runner-optimized version"
+            python scripts/runner_optimized_ai_review.py
+          elif [ -f "scripts/enhanced_local_ai_review.py" ]; then
+            echo "⚡ Using enhanced version"
+            python scripts/enhanced_local_ai_review.py
+          elif [ -f "scripts/local_ai_review.py" ]; then
+            echo "🐌 Using legacy version"
+            python scripts/local_ai_review.py
+          else
+            echo "❌ No AI review script found"
+            exit 1
+          fi
         continue-on-error: false
         timeout-minutes: 25
       
@@ -164,17 +178,18 @@ jobs:
           # Show system resource usage
           echo ""
           echo "🏃 Final System Resources:"
-          echo "CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)%"
-          echo "Memory Usage: $(free | grep Mem | awk '{printf("%.1f%%", $3/$2 * 100.0)}')"
-          echo "Disk Usage: $(df / | tail -1 | awk '{print $5}')"
+          echo "CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 2>/dev/null || echo 'N/A')%"
+          echo "Memory Usage: $(free | grep Mem | awk '{printf("%.1f%%", $3/$2 * 100.0)}' 2>/dev/null || echo 'N/A')"
+          echo "Disk Usage: $(df / | tail -1 | awk '{print $5}' 2>/dev/null || echo 'N/A')"
       
       - name: 📁 Archive Logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated to v4
         with:
           name: ai-review-logs-pr-${{ github.event.pull_request.number }}
           path: ${{ runner.temp }}/ai_review_logs/
           retention-days: 7
+          if-no-files-found: ignore  # Don't fail if no logs
       
       - name: 🧹 Cleanup
         if: always()
@@ -183,13 +198,12 @@ jobs:
           
           # Clean up temporary files but preserve cache
           rm -rf "${RUNNER_TEMP}/ai_review_temp_*" 2>/dev/null || true
-          rm -rf "${RUNNER_TEMP}/ai_review_logs" 2>/dev/null || true
           
           # Show final cache stats
           CACHE_DIR="${RUNNER_TEMP}/ai_review_cache"
           if [ -d "$CACHE_DIR" ]; then
-            echo "📊 Final cache size: $(du -sh "$CACHE_DIR")"
-            echo "📊 Final cache entries: $(find "$CACHE_DIR" -name "*.json" | wc -l)"
+            echo "📊 Final cache size: $(du -sh "$CACHE_DIR" 2>/dev/null || echo 'Unknown')"
+            echo "📊 Final cache entries: $(find "$CACHE_DIR" -name "*.json" 2>/dev/null | wc -l || echo 'Unknown')"
           fi
           
           echo "✅ Cleanup completed"
@@ -197,22 +211,29 @@ jobs:
       # Optional: Notify on failure
       - name: 💬 Notify on Failure
         if: failure()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7  # Updated to v7
         with:
           script: |
             const issue_number = context.payload.pull_request.number;
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const message = `🤖❌ **AI Code Review Failed**
             
-            The automated code review encountered an error. Please check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+            The automated code review encountered an error. Please check the [workflow logs](${runUrl}) for details.
             
-            Common issues:
+            **Common issues:**
             - LM Studio not running or model not loaded
-            - Insufficient system resources
+            - Insufficient system resources  
             - Network connectivity issues
+            - Missing dependencies
+            
+            **Quick fixes:**
+            1. Check LM Studio is running: \`curl http://127.0.0.1:8080/v1/models\`
+            2. Verify system resources: \`free -h && df -h\`
+            3. Check runner logs for specific errors
             
             The review will be retried automatically on the next push.`;
             
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
@@ -231,6 +252,7 @@ jobs:
         run: |
           echo "📋 AI Code Review Summary for PR #${{ github.event.pull_request.number }}"
           echo "Status: ${{ needs.ai-code-review.result }}"
+          echo "Runner: $RUNNER_NAME (v$(cat /opt/actions-runner/.runner 2>/dev/null | jq -r '.agentVersion' 2>/dev/null || echo 'Unknown'))"
           
           if [ "${{ needs.ai-code-review.result }}" = "success" ]; then
             echo "✅ AI Code Review completed successfully"
