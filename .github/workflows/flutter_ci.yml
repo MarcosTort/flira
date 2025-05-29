@@ -57,11 +57,22 @@ jobs:
           # Checkout the PR head
           ref: ${{ github.event.pull_request.head.sha }}
       
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5  # Updated to v5
-        with:
-          python-version: '3.9'
-          cache: 'pip'
+      - name: 🐍 Use System Python
+        run: |
+          echo "🍎 Using macOS system Python..."
+          python3 --version
+          
+          # Upgrade pip (user install to avoid permissions)
+          python3 -m pip install --upgrade pip --user
+          
+          # Install dependencies
+          if [ -f "requirements.txt" ]; then
+            python3 -m pip install -r requirements.txt --user
+          else
+            python3 -m pip install --user PyGithub requests aiohttp psutil
+          fi
+    
+    echo "✅ Python setup completed"
       
       - name: 📦 Install Dependencies
         run: |
