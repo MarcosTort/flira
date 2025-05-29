@@ -1,263 +1,265 @@
-# .github/workflows/ai-code-review-fixed.yml
-name: 🤖 AI Code Review (Fixed)
+# .github/workflows/ai-code-review-macos.yml
+name: 🤖 AI Code Review (macOS)
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    # Exclude draft PRs to save resources
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/workflows/**'
-      - 'README*'
 
-# Ensure only one review runs at a time per PR
 concurrency:
   group: ai-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
-  # Runner optimization settingss
   PYTHONUNBUFFERED: 1
-  PYTHONDONTWRITEBYTECODE: 1
-  # GitHub context
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   REPO_NAME: ${{ github.repository }}
   PR_NUMBER: ${{ github.event.pull_request.number }}
   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
   BASE_SHA: ${{ github.event.pull_request.base.sha }}
-  # LM Studio configuration
-  INFERENCE_SERVER_URL: ${{ vars.LMSTUDIO_API_URL || 'http://127.0.0.1:8080' }}
   LMSTUDIO_API_URL: ${{ vars.LMSTUDIO_API_URL || 'http://127.0.0.1:8080' }}
-  # Performance tuning
-  MAX_CONCURRENT_WORKERS: ${{ vars.MAX_WORKERS || '6' }}
-  MAX_COMMENTS_PER_FILE: ${{ vars.MAX_COMMENTS_PER_FILE || '8' }}
-  REQUEST_TIMEOUT: ${{ vars.REQUEST_TIMEOUT || '45' }}
-  TEMPERATURE: ${{ vars.AI_TEMPERATURE || '0.2' }}
-  MAX_TOKENS: ${{ vars.MAX_TOKENS || '200' }}
+  # macOS specific
+  AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/../hostedtoolcache
+  RUNNER_TOOL_CACHE: ${{ github.workspace }}/../hostedtoolcache
 
 jobs:
   ai-code-review:
     name: 🤖 AI Code Review
     runs-on: self-hosted
-    timeout-minutes: 30  # Prevent runaway jobs
+    timeout-minutes: 30
     
-    # Skip if PR is draft or created by bots
     if: >
       github.event.pull_request.draft == false &&
-      !contains(github.event.pull_request.user.login, 'bot') &&
-      !contains(github.event.pull_request.user.login, 'dependabot')
+      !contains(github.event.pull_request.user.login, 'bot')
     
     steps:
       - name: 📋 Checkout Repository
         uses: actions/checkout@v4
         with:
-          # Fetch full history for better context
           fetch-depth: 0
-          # Checkout the PR head
           ref: ${{ github.event.pull_request.head.sha }}
       
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5  # Updated to v5
-        with:
-          python-version: '3.9'
-          cache: 'pip'
+      # SKIP actions/setup-python - use system Python instead  
+      - name: 🐍 Use System Python (macOS Fix)
+        run: |
+          echo "🍎 Using system Python to avoid permission issues..."
+          
+          # Find best available Python
+          if command -v python3.9 &> /dev/null; then
+            PYTHON_CMD=python3.9
+          elif command -v python3 &> /dev/null; then
+            PYTHON_CMD=python3
+          else
+            echo "❌ No Python 3 found"
+            exit 1
+          fi
+          
+          echo "🐍 Using: $PYTHON_CMD"
+          $PYTHON_CMD --version
+          
+          # Create tool cache directory with proper permissions
+          TOOL_CACHE="${{ github.workspace }}/../hostedtoolcache"
+          mkdir -p "$TOOL_CACHE"
+          chmod 755 "$TOOL_CACHE"
+          
+          echo "🔧 Tool cache: $TOOL_CACHE"
+          echo "✅ Python environment ready"
       
       - name: 📦 Install Dependencies
         run: |
-          echo "🔧 Installing enhanced AI review dependencies..."
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          echo "✅ Dependencies installed successfully"
+          echo "📦 Installing Python dependencies..."
+          
+          # Use the best available Python
+          if command -v python3.9 &> /dev/null; then
+            PYTHON_CMD=python3.9
+          elif command -v python3 &> /dev/null; then
+            PYTHON_CMD=python3
+          else
+            exit 1
+          fi
+          
+          # Upgrade pip
+          $PYTHON_CMD -m pip install --upgrade pip --user
+          
+          # Install requirements
+          if [ -f "requirements.txt" ]; then
+            $PYTHON_CMD -m pip install -r requirements.txt --user
+          else
+            # Install minimal dependencies
+            $PYTHON_CMD -m pip install --user \
+              PyGithub==1.59.1 \
+              requests==2.31.0 \
+              aiohttp==3.9.1 \
+              psutil==5.9.6
+          fi
+          
+          echo "✅ Dependencies installed"
       
       - name: 🏃 Check Runner Environment
         run: |
-          echo "🏃 Runner Environment Information:"
-          echo "Runner Name: $RUNNER_NAME"
-          echo "Runner OS: $RUNNER_OS"
-          echo "Runner Architecture: $RUNNER_ARCH"
-          echo "Runner Version: $(cat /opt/actions-runner/.runner 2>/dev/null | jq -r '.agentVersion' 2>/dev/null || echo 'Unknown')"
-          echo "Available CPUs: $(nproc)"
-          echo "Available Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
-          echo "Available Disk: $(df -h / | tail -1 | awk '{print $4}')"
-          echo "Python Version: $(python --version)"
+          echo "🍎 macOS Runner Environment:"
+          echo "User: $(whoami)"
+          echo "Home: $HOME"
           echo "Working Directory: $(pwd)"
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "PR Number: $PR_NUMBER"
+          echo "Python: $(which python3)"
+          echo "Python version: $(python3 --version)"
+          echo "Architecture: $(uname -m)"
+          echo "System: $(sw_vers -productName) $(sw_vers -productVersion)"
+          echo "Memory: $(system_profiler SPHardwareDataType | grep "Memory:" | awk '{print $2, $3}')"
+          echo "Disk space: $(df -h / | tail -1 | awk '{print $4}') available"
       
-      - name: 🔌 Verify LM Studio Connection
+      - name: 🔌 Verify LM Studio
         run: |
-          echo "🔌 Checking LM Studio availability..."
+          echo "🔌 Checking LM Studio connection..."
           
-          # Wait for LM Studio to be ready (with timeout)
-          timeout=60
-          counter=0
+          # Test with both localhost and 127.0.0.1
+          URLS=("${LMSTUDIO_API_URL}" "http://localhost:8080" "http://127.0.0.1:8080")
           
-          until curl -f -s "${LMSTUDIO_API_URL}/v1/models" > /dev/null; do
-            if [ $counter -ge $timeout ]; then
-              echo "❌ LM Studio not available after ${timeout}s timeout"
-              echo "💡 Please ensure:"
-              echo "   - LM Studio is running on the self-hosted runner"
-              echo "   - A model is loaded and ready"
-              echo "   - API server is accessible at: $LMSTUDIO_API_URL"
-              exit 1
+          for url in "${URLS[@]}"; do
+            echo "Testing: $url"
+            if curl -f -s "$url/v1/models" &> /dev/null; then
+              echo "✅ LM Studio responding at: $url"
+              export LMSTUDIO_API_URL="$url"
+              break
             fi
-            
-            echo "⏳ Waiting for LM Studio... (${counter}s/${timeout}s)"
-            sleep 5
-            counter=$((counter + 5))
           done
           
-          echo "✅ LM Studio is ready!"
-          
-          # Get model information
-          echo "🤖 Available models:"
-          curl -s "${LMSTUDIO_API_URL}/v1/models" | python -m json.tool || echo "Could not parse model response"
-      
-      - name: 🗄️ Setup Cache
-        run: |
-          echo "🗄️ Setting up cache directory..."
-          
-          # Create cache directory in runner temp
-          CACHE_DIR="${RUNNER_TEMP}/ai_review_cache"
-          mkdir -p "$CACHE_DIR"
-          
-          echo "📊 Cache directory: $CACHE_DIR"
-          echo "📊 Cache size before: $(du -sh "$CACHE_DIR" 2>/dev/null || echo '0 B')"
-          
-          # Clean old cache entries (older than 7 days)
-          find "$CACHE_DIR" -name "*.json" -mtime +7 -delete 2>/dev/null || true
-          
-          echo "📊 Cache size after cleanup: $(du -sh "$CACHE_DIR" 2>/dev/null || echo '0 B')"
-          echo "📊 Cache entries: $(find "$CACHE_DIR" -name "*.json" | wc -l)"
+          # Final test
+          if curl -f -s "${LMSTUDIO_API_URL}/v1/models" &> /dev/null; then
+            echo "✅ LM Studio is ready!"
+            echo "📊 Models available:"
+            curl -s "${LMSTUDIO_API_URL}/v1/models" | python3 -c "
+import json, sys
+try:
+    data = json.load(sys.stdin)
+    models = data.get('data', [])
+    print(f'  Count: {len(models)}')
+    for model in models[:2]:
+        print(f'  - {model.get(\"id\", \"unknown\")}')
+except:
+    print('  Could not parse model info')
+" 2>/dev/null || echo "  Model info not available"
+          else
+            echo "❌ LM Studio not responding"
+            echo "💡 macOS Setup:"
+            echo "  1. Open LM Studio app"
+            echo "  2. Load a model (Code Llama, etc.)"
+            echo "  3. Go to Local Server tab"
+            echo "  4. Start the server on port 8080"
+            exit 1
+          fi
       
       - name: 🤖 Run AI Code Review
-        id: ai-review
         run: |
           echo "🚀 Starting AI Code Review..."
           
-          # Set additional environment variables for the script
-          export CACHE_DIR="${RUNNER_TEMP}/ai_review_cache"
-          export LOG_DIR="${RUNNER_TEMP}/ai_review_logs"
-          mkdir -p "$LOG_DIR"
-          
-          # Enable debug logging if runner debug is enabled
-          if [ "$RUNNER_DEBUG" = "1" ]; then
-            export PYTHONVERBOSE=1
-          fi
-          
-          # Check if enhanced script exists, fallback to original if not
-          if [ -f "scripts/runner_optimized_ai_review.py" ]; then
-            echo "🚀 Using runner-optimized version"
-            python scripts/runner_optimized_ai_review.py
-          elif [ -f "scripts/enhanced_local_ai_review.py" ]; then
-            echo "⚡ Using enhanced version"
-            python scripts/enhanced_local_ai_review.py
-          elif [ -f "scripts/local_ai_review.py" ]; then
-            echo "🐌 Using legacy version"
-            python scripts/local_ai_review.py
+          # Use the best available Python
+          if command -v python3.9 &> /dev/null; then
+            PYTHON_CMD=python3.9
+          elif command -v python3 &> /dev/null; then
+            PYTHON_CMD=python3
           else
-            echo "❌ No AI review script found"
             exit 1
           fi
-        continue-on-error: false
+          
+          # Set up directories
+          export CACHE_DIR="$HOME/ai_review_cache"
+          export LOG_DIR="$HOME/ai_review_logs"
+          mkdir -p "$CACHE_DIR" "$LOG_DIR"
+          
+          echo "📂 Cache: $CACHE_DIR"
+          echo "📂 Logs: $LOG_DIR"
+          
+          # Find and run the review script
+          SCRIPT_FOUND=false
+          
+          for script in "scripts/runner_optimized_ai_review.py" \
+                        "scripts/enhanced_local_ai_review.py" \
+                        "scripts/local_ai_review.py"; do
+            if [ -f "$script" ]; then
+              echo "🎯 Running: $script"
+              $PYTHON_CMD "$script"
+              SCRIPT_FOUND=true
+              break
+            fi
+          done
+          
+          if [ "$SCRIPT_FOUND" = false ]; then
+            echo "❌ No AI review script found!"
+            echo "Available Python files:"
+            find . -name "*.py" -path "*/scripts/*" | head -10
+            exit 1
+          fi
+          
+          echo "✅ AI Code Review completed"
         timeout-minutes: 25
       
-      - name: 📊 Review Statistics
+      - name: 📊 Results Summary
         if: always()
         run: |
-          echo "📊 Final Review Statistics:"
-          echo "Files Processed: ${{ steps.ai-review.outputs.files_processed || 'N/A' }}"
-          echo "Lines Analyzed: ${{ steps.ai-review.outputs.lines_analyzed || 'N/A' }}"
-          echo "Issues Found: ${{ steps.ai-review.outputs.issues_found || 'N/A' }}"
-          echo "Processing Time: ${{ steps.ai-review.outputs.processing_time || 'N/A' }}s"
-          echo "Cache Hit Rate: ${{ steps.ai-review.outputs.cache_hit_rate || 'N/A' }}%"
-          echo "Issue Rate: ${{ steps.ai-review.outputs.issue_rate || 'N/A' }}%"
-          echo "Lines/Second: ${{ steps.ai-review.outputs.lines_per_second || 'N/A' }}"
+          echo "📊 macOS Review Summary:"
+          echo "========================================"
           
-          # Show system resource usage
-          echo ""
-          echo "🏃 Final System Resources:"
-          echo "CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 2>/dev/null || echo 'N/A')%"
-          echo "Memory Usage: $(free | grep Mem | awk '{printf("%.1f%%", $3/$2 * 100.0)}' 2>/dev/null || echo 'N/A')"
-          echo "Disk Usage: $(df / | tail -1 | awk '{print $5}' 2>/dev/null || echo 'N/A')"
+          # System stats
+          echo "🍎 System Status:"
+          echo "Memory pressure: $(memory_pressure 2>/dev/null | head -1 || echo 'normal')"
+          echo "Disk usage: $(df -h / | tail -1 | awk '{print $5}')"
+          echo "Load: $(uptime | sed 's/.*load averages: //')"
+          
+          # Cache stats
+          if [ -d "$HOME/ai_review_cache" ]; then
+            echo ""
+            echo "💾 Cache Status:"
+            echo "Size: $(du -sh "$HOME/ai_review_cache" 2>/dev/null | cut -f1)"
+            echo "Files: $(find "$HOME/ai_review_cache" -name "*.json" 2>/dev/null | wc -l | xargs)"
+          fi
+          
+          # Log summary
+          if [ -d "$HOME/ai_review_logs" ]; then
+            echo ""
+            echo "📝 Logs:"
+            find "$HOME/ai_review_logs" -name "*.log" -exec echo "  - {}" \; 2>/dev/null | head -3
+          fi
       
-      - name: 📁 Archive Logs
+      - name: 📁 Manual Log Archive
         if: always()
-        uses: actions/upload-artifact@v4  # Updated to v4
-        with:
-          name: ai-review-logs-pr-${{ github.event.pull_request.number }}
-          path: ${{ runner.temp }}/ai_review_logs/
-          retention-days: 7
-          if-no-files-found: ignore  # Don't fail if no logs
+        run: |
+          echo "📁 Creating manual log archive..."
+          
+          LOG_DIR="$HOME/ai_review_logs"
+          ARCHIVE_NAME="ai-review-logs-pr-${{ github.event.pull_request.number }}-$(date +%Y%m%d-%H%M%S).tar.gz"
+          
+          if [ -d "$LOG_DIR" ] && [ "$(ls -A "$LOG_DIR" 2>/dev/null)" ]; then
+            cd "$HOME"
+            tar -czf "$ARCHIVE_NAME" ai_review_logs/ 2>/dev/null || true
+            
+            if [ -f "$ARCHIVE_NAME" ]; then
+              echo "✅ Logs archived: $ARCHIVE_NAME"
+              echo "📊 Archive size: $(ls -lh "$ARCHIVE_NAME" | awk '{print $5}')"
+              
+              # Move to workspace for potential access
+              mv "$ARCHIVE_NAME" "${{ github.workspace }}/" 2>/dev/null || true
+            else
+              echo "⚠️ Failed to create archive"
+            fi
+          else
+            echo "ℹ️ No logs found to archive"
+          fi
       
       - name: 🧹 Cleanup
         if: always()
         run: |
-          echo "🧹 Cleaning up temporary files..."
+          echo "🧹 Cleaning up..."
           
-          # Clean up temporary files but preserve cache
-          rm -rf "${RUNNER_TEMP}/ai_review_temp_*" 2>/dev/null || true
+          # Remove temporary files
+          find /tmp -name "*ai_review*" -user $(whoami) -delete 2>/dev/null || true
           
-          # Show final cache stats
-          CACHE_DIR="${RUNNER_TEMP}/ai_review_cache"
+          # Clean old cache entries (keep recent ones)
+          CACHE_DIR="$HOME/ai_review_cache"
           if [ -d "$CACHE_DIR" ]; then
-            echo "📊 Final cache size: $(du -sh "$CACHE_DIR" 2>/dev/null || echo 'Unknown')"
-            echo "📊 Final cache entries: $(find "$CACHE_DIR" -name "*.json" 2>/dev/null | wc -l || echo 'Unknown')"
+            # Remove entries older than 7 days
+            find "$CACHE_DIR" -name "*.json" -mtime +7 -delete 2>/dev/null || true
+            echo "🗄️ Cache cleaned (kept recent entries)"
           fi
           
-          echo "✅ Cleanup completed"
-      
-      # Optional: Notify on failure
-      - name: 💬 Notify on Failure
-        if: failure()
-        uses: actions/github-script@v7  # Updated to v7
-        with:
-          script: |
-            const issue_number = context.payload.pull_request.number;
-            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const message = `🤖❌ **AI Code Review Failed**
-            
-            The automated code review encountered an error. Please check the [workflow logs](${runUrl}) for details.
-            
-            **Common issues:**
-            - LM Studio not running or model not loaded
-            - Insufficient system resources  
-            - Network connectivity issues
-            - Missing dependencies
-            
-            **Quick fixes:**
-            1. Check LM Studio is running: \`curl http://127.0.0.1:8080/v1/models\`
-            2. Verify system resources: \`free -h && df -h\`
-            3. Check runner logs for specific errors
-            
-            The review will be retried automatically on the next push.`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: message
-            });
-
-  # Optional: Summary job for multiple reviews
-  review-summary:
-    name: 📋 Review Summary
-    runs-on: self-hosted
-    needs: [ai-code-review]
-    if: always()
-    
-    steps:
-      - name: 📋 Generate Summary
-        run: |
-          echo "📋 AI Code Review Summary for PR #${{ github.event.pull_request.number }}"
-          echo "Status: ${{ needs.ai-code-review.result }}"
-          echo "Runner: $RUNNER_NAME (v$(cat /opt/actions-runner/.runner 2>/dev/null | jq -r '.agentVersion' 2>/dev/null || echo 'Unknown'))"
-          
-          if [ "${{ needs.ai-code-review.result }}" = "success" ]; then
-            echo "✅ AI Code Review completed successfully"
-            echo "📊 Check the PR for detailed feedback"
-          else
-            echo "❌ AI Code Review failed or was cancelled"
-            echo "🔍 Check the workflow logs for details"
-          fi
+          # Show final status
+          echo
