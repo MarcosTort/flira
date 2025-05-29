@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Runner optimization settings
+  # Runner optimization settingss
   PYTHONUNBUFFERED: 1
   PYTHONDONTWRITEBYTECODE: 1
   # GitHub context
