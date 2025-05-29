@@ -1,274 +1,215 @@
-# .github/workflows/ai-code-review-fixed.yml
-name: 🤖 AI Code Review (Fixed)
+# .github/workflows/ai-code-review.yml
+name: AI Code Review
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    # Exclude draft PRs to save resources
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/workflows/**'
-      - 'README*'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
+      review_depth:
+        description: 'Review depth'
+        required: false
+        default: 'comprehensive'
+        type: choice
+        options:
+          - quick
+          - standard
+          - comprehensive
 
-# Ensure only one review runs at a time per PR
-concurrency:
-  group: ai-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
-env:
-  # Runner optimization settingss
-  PYTHONUNBUFFERED: 1
-  PYTHONDONTWRITEBYTECODE: 1
-  # GitHub context
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  REPO_NAME: ${{ github.repository }}
-  PR_NUMBER: ${{ github.event.pull_request.number }}
-  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-  BASE_SHA: ${{ github.event.pull_request.base.sha }}
-  # LM Studio configuration
-  INFERENCE_SERVER_URL: ${{ vars.LMSTUDIO_API_URL || 'http://127.0.0.1:8080' }}
-  LMSTUDIO_API_URL: ${{ vars.LMSTUDIO_API_URL || 'http://127.0.0.1:8080' }}
-  # Performance tuning
-  MAX_CONCURRENT_WORKERS: ${{ vars.MAX_WORKERS || '6' }}
-  MAX_COMMENTS_PER_FILE: ${{ vars.MAX_COMMENTS_PER_FILE || '8' }}
-  REQUEST_TIMEOUT: ${{ vars.REQUEST_TIMEOUT || '45' }}
-  TEMPERATURE: ${{ vars.AI_TEMPERATURE || '0.2' }}
-  MAX_TOKENS: ${{ vars.MAX_TOKENS || '200' }}
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
-  ai-code-review:
-    name: 🤖 AI Code Review
+  ai-review:
+    name: Run AI Code Review
     runs-on: self-hosted
-    timeout-minutes: 30  # Prevent runaway jobs
     
-    # Skip if PR is draft or created by bots
-    if: >
-      github.event.pull_request.draft == false &&
-      !contains(github.event.pull_request.user.login, 'bot') &&
-      !contains(github.event.pull_request.user.login, 'dependabot')
+    # Prevent multiple reviews running simultaneously
+    concurrency:
+      group: ai-review-${{ github.event.pull_request.number || inputs.pr_number }}
+      cancel-in-progress: true
     
     steps:
-      - name: 📋 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          # Fetch full history for better context
-          fetch-depth: 0
-          # Checkout the PR head
-          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0  # Full history for better context
       
-      - name: 🐍 Use System Python
-        run: |
-          echo "🍎 Using macOS system Python..."
-          python3 --version
-          
-          # Upgrade pip (user install to avoid permissions)
-          python3 -m pip install --upgrade pip --user
-          
-          # Install dependencies
-          if [ -f "requirements.txt" ]; then
-            python3 -m pip install -r requirements.txt --user
-          else
-            python3 -m pip install --user PyGithub requests aiohttp psutil
-          fi
-    
-    echo "✅ Python setup completed"
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
       
-      - name: 📦 Install Dependencies
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            venv/
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install Dependencies
         run: |
-          echo "🔧 Installing enhanced AI review dependencies..."
+          python -m venv venv
+          source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          echo "✅ Dependencies installed successfully"
       
-      - name: 🏃 Check Runner Environment
+      - name: Determine PR Number
+        id: pr-number
         run: |
-          echo "🏃 Runner Environment Information:"
-          echo "Runner Name: $RUNNER_NAME"
-          echo "Runner OS: $RUNNER_OS"
-          echo "Runner Architecture: $RUNNER_ARCH"
-          echo "Runner Version: $(cat /opt/actions-runner/.runner 2>/dev/null | jq -r '.agentVersion' 2>/dev/null || echo 'Unknown')"
-          echo "Available CPUs: $(nproc)"
-          echo "Available Memory: $(free -h | grep '^Mem:' | awk '{print $2}')"
-          echo "Available Disk: $(df -h / | tail -1 | awk '{print $4}')"
-          echo "Python Version: $(python --version)"
-          echo "Working Directory: $(pwd)"
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "PR Number: $PR_NUMBER"
-      
-      - name: 🔌 Verify LM Studio Connection
-        run: |
-          echo "🔌 Checking LM Studio availability..."
-          
-          # Wait for LM Studio to be ready (with timeout)
-          timeout=60
-          counter=0
-          
-          until curl -f -s "${LMSTUDIO_API_URL}/v1/models" > /dev/null; do
-            if [ $counter -ge $timeout ]; then
-              echo "❌ LM Studio not available after ${timeout}s timeout"
-              echo "💡 Please ensure:"
-              echo "   - LM Studio is running on the self-hosted runner"
-              echo "   - A model is loaded and ready"
-              echo "   - API server is accessible at: $LMSTUDIO_API_URL"
-              exit 1
-            fi
-            
-            echo "⏳ Waiting for LM Studio... (${counter}s/${timeout}s)"
-            sleep 5
-            counter=$((counter + 5))
-          done
-          
-          echo "✅ LM Studio is ready!"
-          
-          # Get model information
-          echo "🤖 Available models:"
-          curl -s "${LMSTUDIO_API_URL}/v1/models" | python -m json.tool || echo "Could not parse model response"
-      
-      - name: 🗄️ Setup Cache
-        run: |
-          echo "🗄️ Setting up cache directory..."
-          
-          # Create cache directory in runner temp
-          CACHE_DIR="${RUNNER_TEMP}/ai_review_cache"
-          mkdir -p "$CACHE_DIR"
-          
-          echo "📊 Cache directory: $CACHE_DIR"
-          echo "📊 Cache size before: $(du -sh "$CACHE_DIR" 2>/dev/null || echo '0 B')"
-          
-          # Clean old cache entries (older than 7 days)
-          find "$CACHE_DIR" -name "*.json" -mtime +7 -delete 2>/dev/null || true
-          
-          echo "📊 Cache size after cleanup: $(du -sh "$CACHE_DIR" 2>/dev/null || echo '0 B')"
-          echo "📊 Cache entries: $(find "$CACHE_DIR" -name "*.json" | wc -l)"
-      
-      - name: 🤖 Run AI Code Review
-        id: ai-review
-        run: |
-          echo "🚀 Starting AI Code Review..."
-          
-          # Set additional environment variables for the script
-          export CACHE_DIR="${RUNNER_TEMP}/ai_review_cache"
-          export LOG_DIR="${RUNNER_TEMP}/ai_review_logs"
-          mkdir -p "$LOG_DIR"
-          
-          # Enable debug logging if runner debug is enabled
-          if [ "$RUNNER_DEBUG" = "1" ]; then
-            export PYTHONVERBOSE=1
-          fi
-          
-          # Check if enhanced script exists, fallback to original if not
-          if [ -f "scripts/runner_optimized_ai_review.py" ]; then
-            echo "🚀 Using runner-optimized version"
-            python scripts/runner_optimized_ai_review.py
-          elif [ -f "scripts/enhanced_local_ai_review.py" ]; then
-            echo "⚡ Using enhanced version"
-            python scripts/enhanced_local_ai_review.py
-          elif [ -f "scripts/local_ai_review.py" ]; then
-            echo "🐌 Using legacy version"
-            python scripts/local_ai_review.py
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
           else
-            echo "❌ No AI review script found"
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Get PR Information
+        id: pr-info
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ steps.pr-number.outputs.pr_number }}"
+          
+          # Get base and head SHAs
+          PR_DATA=$(gh pr view $PR_NUMBER --json baseRefOid,headRefOid)
+          BASE_SHA=$(echo $PR_DATA | jq -r .baseRefOid)
+          HEAD_SHA=$(echo $PR_DATA | jq -r .headRefOid)
+          
+          echo "base_sha=$BASE_SHA" >> $GITHUB_OUTPUT
+          echo "head_sha=$HEAD_SHA" >> $GITHUB_OUTPUT
+          
+          # Log for debugging
+          echo "PR #$PR_NUMBER: base=$BASE_SHA, head=$HEAD_SHA"
+      
+      - name: Check LM Studio Status
+        id: lm-check
+        run: |
+          source venv/bin/activate
+          
+          # Check if LM Studio is accessible
+          if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/v1/models | grep -q "200"; then
+            echo "status=ready" >> $GITHUB_OUTPUT
+            echo "✅ LM Studio is ready"
+          else
+            echo "status=not_ready" >> $GITHUB_OUTPUT
+            echo "❌ LM Studio is not accessible"
             exit 1
           fi
-        continue-on-error: false
-        timeout-minutes: 25
       
-      - name: 📊 Review Statistics
-        if: always()
+      - name: Run AI Code Review
+        if: steps.lm-check.outputs.status == 'ready'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.pr-number.outputs.pr_number }}
+          BASE_SHA: ${{ steps.pr-info.outputs.base_sha }}
+          HEAD_SHA: ${{ steps.pr-info.outputs.head_sha }}
+          INFERENCE_SERVER_URL: http://127.0.0.1:8080
+          REVIEW_DEPTH: ${{ inputs.review_depth || 'comprehensive' }}
+          # Performance tuning
+          BATCH_SIZE: 5
+          PARALLEL_WORKERS: 3
+          MAX_COMMENTS_PER_FILE: 10
+          CONTEXT_LINES: 15
+          ENABLE_CACHING: true
+          MIN_CONFIDENCE_SCORE: 0.7
         run: |
-          echo "📊 Final Review Statistics:"
-          echo "Files Processed: ${{ steps.ai-review.outputs.files_processed || 'N/A' }}"
-          echo "Lines Analyzed: ${{ steps.ai-review.outputs.lines_analyzed || 'N/A' }}"
-          echo "Issues Found: ${{ steps.ai-review.outputs.issues_found || 'N/A' }}"
-          echo "Processing Time: ${{ steps.ai-review.outputs.processing_time || 'N/A' }}s"
-          echo "Cache Hit Rate: ${{ steps.ai-review.outputs.cache_hit_rate || 'N/A' }}%"
-          echo "Issue Rate: ${{ steps.ai-review.outputs.issue_rate || 'N/A' }}%"
-          echo "Lines/Second: ${{ steps.ai-review.outputs.lines_per_second || 'N/A' }}"
+          source venv/bin/activate
           
-          # Show system resource usage
-          echo ""
-          echo "🏃 Final System Resources:"
-          echo "CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 2>/dev/null || echo 'N/A')%"
-          echo "Memory Usage: $(free | grep Mem | awk '{printf("%.1f%%", $3/$2 * 100.0)}' 2>/dev/null || echo 'N/A')"
-          echo "Disk Usage: $(df / | tail -1 | awk '{print $5}' 2>/dev/null || echo 'N/A')"
-      
-      - name: 📁 Archive Logs
-        if: always()
-        uses: actions/upload-artifact@v4  # Updated to v4
-        with:
-          name: ai-review-logs-pr-${{ github.event.pull_request.number }}
-          path: ${{ runner.temp }}/ai_review_logs/
-          retention-days: 7
-          if-no-files-found: ignore  # Don't fail if no logs
-      
-      - name: 🧹 Cleanup
-        if: always()
-        run: |
-          echo "🧹 Cleaning up temporary files..."
+          echo "🚀 Starting AI Code Review for PR #$PR_NUMBER"
+          echo "📊 Review Depth: $REVIEW_DEPTH"
           
-          # Clean up temporary files but preserve cache
-          rm -rf "${RUNNER_TEMP}/ai_review_temp_*" 2>/dev/null || true
+          # Run the review
+          python scripts/local_ai_review.py
           
-          # Show final cache stats
-          CACHE_DIR="${RUNNER_TEMP}/ai_review_cache"
-          if [ -d "$CACHE_DIR" ]; then
-            echo "📊 Final cache size: $(du -sh "$CACHE_DIR" 2>/dev/null || echo 'Unknown')"
-            echo "📊 Final cache entries: $(find "$CACHE_DIR" -name "*.json" 2>/dev/null | wc -l || echo 'Unknown')"
+          # Check exit code
+          REVIEW_EXIT_CODE=$?
+          
+          if [ $REVIEW_EXIT_CODE -eq 0 ]; then
+            echo "✅ AI Review completed successfully"
+          else
+            echo "❌ AI Review failed with exit code: $REVIEW_EXIT_CODE"
+            exit $REVIEW_EXIT_CODE
           fi
-          
-          echo "✅ Cleanup completed"
       
-      # Optional: Notify on failure
-      - name: 💬 Notify on Failure
-        if: failure()
-        uses: actions/github-script@v7  # Updated to v7
+      - name: Upload Review Statistics
+        if: always()
+        uses: actions/upload-artifact@v3
         with:
-          script: |
-            const issue_number = context.payload.pull_request.number;
-            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const message = `🤖❌ **AI Code Review Failed**
-            
-            The automated code review encountered an error. Please check the [workflow logs](${runUrl}) for details.
-            
-            **Common issues:**
-            - LM Studio not running or model not loaded
-            - Insufficient system resources  
-            - Network connectivity issues
-            - Missing dependencies
-            
-            **Quick fixes:**
-            1. Check LM Studio is running: \`curl http://127.0.0.1:8080/v1/models\`
-            2. Verify system resources: \`free -h && df -h\`
-            3. Check runner logs for specific errors
-            
-            The review will be retried automatically on the next push.`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: message
-            });
+          name: review-stats-pr-${{ steps.pr-number.outputs.pr_number }}
+          path: |
+            review_stats_pr_*.json
+          retention-days: 30
+      
+      - name: Post Error Comment
+        if: failure() && steps.lm-check.outputs.status != 'ready'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ steps.pr-number.outputs.pr_number }}"
+          
+          gh pr comment $PR_NUMBER --body "❌ **AI Code Review Failed**
+          
+          The AI review could not be completed because LM Studio is not accessible.
+          
+          Please ensure:
+          - LM Studio is running on the self-hosted runner
+          - A model is loaded and ready
+          - The API is accessible at http://127.0.0.1:8080
+          
+          You can manually trigger the review again using the workflow dispatch once the issue is resolved."
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          # Clean up temporary files
+          rm -f review_stats_pr_*.json
+          
+          # Deactivate virtual environment
+          deactivate || true
 
-  # Optional: Summary job for multiple reviews
-  review-summary:
-    name: 📋 Review Summary
+  # Optional: Performance monitoring job
+  monitor-performance:
+    name: Monitor Review Performance
     runs-on: self-hosted
-    needs: [ai-code-review]
-    if: always()
+    needs: ai-review
+    if: success()
     
     steps:
-      - name: 📋 Generate Summary
+      - name: Download Statistics
+        uses: actions/download-artifact@v3
+        with:
+          name: review-stats-pr-${{ github.event.pull_request.number || inputs.pr_number }}
+      
+      - name: Analyze Performance
         run: |
-          echo "📋 AI Code Review Summary for PR #${{ github.event.pull_request.number }}"
-          echo "Status: ${{ needs.ai-code-review.result }}"
-          echo "Runner: $RUNNER_NAME (v$(cat /opt/actions-runner/.runner 2>/dev/null | jq -r '.agentVersion' 2>/dev/null || echo 'Unknown'))"
-          
-          if [ "${{ needs.ai-code-review.result }}" = "success" ]; then
-            echo "✅ AI Code Review completed successfully"
-            echo "📊 Check the PR for detailed feedback"
-          else
-            echo "❌ AI Code Review failed or was cancelled"
-            echo "🔍 Check the workflow logs for details"
+          # Parse statistics and generate insights
+          if [ -f review_stats_pr_*.json ]; then
+            echo "📊 Performance Analysis:"
+            
+            # Extract key metrics using jq
+            DURATION=$(jq -r '.total_duration' review_stats_pr_*.json)
+            FILES=$(jq -r '.files_processed' review_stats_pr_*.json)
+            API_CALLS=$(jq -r '.api_calls' review_stats_pr_*.json)
+            CACHE_HITS=$(jq -r '.cache_hits' review_stats_pr_*.json)
+            CACHE_MISSES=$(jq -r '.cache_misses' review_stats_pr_*.json)
+            
+            echo "- Total Duration: ${DURATION}s"
+            echo "- Files Processed: $FILES"
+            echo "- API Calls: $API_CALLS"
+            
+            if [ "$CACHE_HITS" -gt 0 ] || [ "$CACHE_MISSES" -gt 0 ]; then
+              CACHE_RATE=$(echo "scale=2; $CACHE_HITS * 100 / ($CACHE_HITS + $CACHE_MISSES)" | bc)
+              echo "- Cache Hit Rate: ${CACHE_RATE}%"
+            fi
           fi
