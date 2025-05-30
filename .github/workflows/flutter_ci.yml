@@ -41,29 +41,6 @@ jobs:
         with:
           fetch-depth: 0  # Full history for better context
       
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-      
-      - name: Cache Dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pip
-            venv/
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      
-      - name: Install Dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-      
       - name: Determine PR Number
         id: pr-number
         run: |
@@ -73,74 +50,20 @@ jobs:
             echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
           fi
       
-      - name: Get PR Information
-        id: pr-info
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_NUMBER="${{ steps.pr-number.outputs.pr_number }}"
-          
-          # Get base and head SHAs
-          PR_DATA=$(gh pr view $PR_NUMBER --json baseRefOid,headRefOid)
-          BASE_SHA=$(echo $PR_DATA | jq -r .baseRefOid)
-          HEAD_SHA=$(echo $PR_DATA | jq -r .headRefOid)
-          
-          echo "base_sha=$BASE_SHA" >> $GITHUB_OUTPUT
-          echo "head_sha=$HEAD_SHA" >> $GITHUB_OUTPUT
-          
-          # Log for debugging
-          echo "PR #$PR_NUMBER: base=$BASE_SHA, head=$HEAD_SHA"
-      
-      - name: Check LM Studio Status
-        id: lm-check
-        run: |
-          source venv/bin/activate
-          
-          # Check if LM Studio is accessible
-          if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/v1/models | grep -q "200"; then
-            echo "status=ready" >> $GITHUB_OUTPUT
-            echo "✅ LM Studio is ready"
-          else
-            echo "status=not_ready" >> $GITHUB_OUTPUT
-            echo "❌ LM Studio is not accessible"
-            exit 1
-          fi
-      
-      - name: Run AI Code Review
-        if: steps.lm-check.outputs.status == 'ready'
+      - name: Run AI Review Script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_NAME: ${{ github.repository }}
-          PR_NUMBER: ${{ steps.pr-number.outputs.pr_number }}
-          BASE_SHA: ${{ steps.pr-info.outputs.base_sha }}
-          HEAD_SHA: ${{ steps.pr-info.outputs.head_sha }}
+          # Use the LM Studio instance on the self-hosted runner
           INFERENCE_SERVER_URL: http://127.0.0.1:8080
+          # Performance settings (optional overrides)
           REVIEW_DEPTH: ${{ inputs.review_depth || 'comprehensive' }}
-          # Performance tuning
-          BATCH_SIZE: 5
-          PARALLEL_WORKERS: 3
-          MAX_COMMENTS_PER_FILE: 10
-          CONTEXT_LINES: 15
-          ENABLE_CACHING: true
-          MIN_CONFIDENCE_SCORE: 0.7
         run: |
-          source venv/bin/activate
-          
-          echo "🚀 Starting AI Code Review for PR #$PR_NUMBER"
-          echo "📊 Review Depth: $REVIEW_DEPTH"
+          # Make script executable
+          chmod +x run_ai_review.sh
           
           # Run the review
-          python scripts/local_ai_review.py
-          
-          # Check exit code
-          REVIEW_EXIT_CODE=$?
-          
-          if [ $REVIEW_EXIT_CODE -eq 0 ]; then
-            echo "✅ AI Review completed successfully"
-          else
-            echo "❌ AI Review failed with exit code: $REVIEW_EXIT_CODE"
-            exit $REVIEW_EXIT_CODE
-          fi
+          ./run_ai_review.sh ${{ steps.pr-number.outputs.pr_number }} --depth $REVIEW_DEPTH
       
       - name: Upload Review Statistics
         if: always()
@@ -148,11 +71,18 @@ jobs:
         with:
           name: review-stats-pr-${{ steps.pr-number.outputs.pr_number }}
           path: |
-            review_stats_pr_*.json
+            stats/review_stats_pr_*.json
           retention-days: 30
       
-      - name: Post Error Comment
-        if: failure() && steps.lm-check.outputs.status != 'ready'
+      - name: Download Review Statistics
+        if: always()
+        uses: actions/download-artifact@v3
+        with:
+          name: review-stats-pr-${{ steps.pr-number.outputs.pr_number }}
+          path: stats/download
+      
+      - name: Post Error Comment on Failure
+        if: failure()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -160,56 +90,11 @@ jobs:
           
           gh pr comment $PR_NUMBER --body "❌ **AI Code Review Failed**
           
-          The AI review could not be completed because LM Studio is not accessible.
-          
-          Please ensure:
+          The AI review could not be completed. Please check:
           - LM Studio is running on the self-hosted runner
           - A model is loaded and ready
           - The API is accessible at http://127.0.0.1:8080
           
-          You can manually trigger the review again using the workflow dispatch once the issue is resolved."
-      
-      - name: Cleanup
-        if: always()
-        run: |
-          # Clean up temporary files
-          rm -f review_stats_pr_*.json
+          Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
           
-          # Deactivate virtual environment
-          deactivate || true
-
-  # Optional: Performance monitoring job
-  monitor-performance:
-    name: Monitor Review Performance
-    runs-on: self-hosted
-    needs: ai-review
-    if: success()
-    
-    steps:
-      - name: Download Statistics
-        uses: actions/download-artifact@v3
-        with:
-          name: review-stats-pr-${{ github.event.pull_request.number || inputs.pr_number }}
-      
-      - name: Analyze Performance
-        run: |
-          # Parse statistics and generate insights
-          if [ -f review_stats_pr_*.json ]; then
-            echo "📊 Performance Analysis:"
-            
-            # Extract key metrics using jq
-            DURATION=$(jq -r '.total_duration' review_stats_pr_*.json)
-            FILES=$(jq -r '.files_processed' review_stats_pr_*.json)
-            API_CALLS=$(jq -r '.api_calls' review_stats_pr_*.json)
-            CACHE_HITS=$(jq -r '.cache_hits' review_stats_pr_*.json)
-            CACHE_MISSES=$(jq -r '.cache_misses' review_stats_pr_*.json)
-            
-            echo "- Total Duration: ${DURATION}s"
-            echo "- Files Processed: $FILES"
-            echo "- API Calls: $API_CALLS"
-            
-            if [ "$CACHE_HITS" -gt 0 ] || [ "$CACHE_MISSES" -gt 0 ]; then
-              CACHE_RATE=$(echo "scale=2; $CACHE_HITS * 100 / ($CACHE_HITS + $CACHE_MISSES)" | bc)
-              echo "- Cache Hit Rate: ${CACHE_RATE}%"
-            fi
-          fi
+          You can manually trigger the review again using the workflow dispatch once the issue is resolved."
