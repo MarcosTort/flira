@@ -59,10 +59,10 @@ jobs:
           # Performance settings (optional overrides)
           REVIEW_DEPTH: ${{ inputs.review_depth || 'comprehensive' }}
         run: |
-          # Make script executable
-          chmod +x run_ai_review.sh
-          
           cd $HOME/actions-runner
+          # Make script executable
+          chmod +x ./run_ai_review.sh
+          
           # Run the review
           ./run_ai_review.sh ${{ steps.pr-number.outputs.pr_number }} --depth $REVIEW_DEPTH
       
