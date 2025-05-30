@@ -62,6 +62,7 @@ jobs:
           # Make script executable
           chmod +x run_ai_review.sh
           
+          cd $HOME/actions-runner
           # Run the review
           ./run_ai_review.sh ${{ steps.pr-number.outputs.pr_number }} --depth $REVIEW_DEPTH
       
