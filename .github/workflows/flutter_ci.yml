@@ -67,19 +67,12 @@ jobs:
       
       - name: Upload Review Statistics
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: review-stats-pr-${{ steps.pr-number.outputs.pr_number }}
           path: |
             stats/review_stats_pr_*.json
           retention-days: 30
-      
-      - name: Download Review Statistics
-        if: always()
-        uses: actions/download-artifact@v3
-        with:
-          name: review-stats-pr-${{ steps.pr-number.outputs.pr_number }}
-          path: stats/download
       
       - name: Post Error Comment on Failure
         if: failure()
