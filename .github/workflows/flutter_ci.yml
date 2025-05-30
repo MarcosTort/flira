@@ -55,7 +55,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_NAME: ${{ github.repository }}
           # Use the LM Studio instance on the self-hosted runner
-          INFERENCE_SERVER_URL: http://127.0.0.1:8080
+          INFERENCE_SERVER_URL: http://192.168.1.5:8080
           # Performance settings (optional overrides)
           REVIEW_DEPTH: ${{ inputs.review_depth || 'comprehensive' }}
         run: |
