@@ -1,0 +1,42 @@
+# .github/workflows/generate-tests.yml
+name: 🧪 Generate Flutter Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Rama para generar tests'
+        required: true
+        type: string
+      lm_studio_url:
+        description: 'URL de LM Studio'
+        required: false
+        default: 'http://192.168.1.7:8080'
+        type: string
+
+jobs:
+  generate-tests:
+    name: Generate Tests
+    runs-on: self-hosted
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 🚀 Run Test Generator
+        run: |
+          python3 scripts/generate_tests.py \
+            --branch "${{ inputs.target_branch }}" \
+            --repo-path "." \
+            --lm-studio-url "${{ inputs.lm_studio_url }}"
+      
+      - name: 📊 Summary
+        if: always()
+        run: |
+          if [ -d "test" ]; then
+            test_count=$(find test -name "*_test.dart" | wc -l)
+            echo "✅ Generated $test_count test files" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ No tests generated" >> $GITHUB_STEP_SUMMARY
+          fi
