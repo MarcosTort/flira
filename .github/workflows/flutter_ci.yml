@@ -1,94 +1,25 @@
-# .github/workflows/ai-code-review.yml
 name: AI Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to review'
-        required: true
-        type: number
-      review_depth:
-        description: 'Review depth'
-        required: false
-        default: 'comprehensive'
-        type: choice
-        options:
-          - quick
-          - standard
-          - comprehensive
-
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
+    types: [opened, synchronize]
 
 jobs:
   ai-review:
-    name: Run AI Code Review
     runs-on: self-hosted
-    
-    # Prevent multiple reviews running simultaneously
-    concurrency:
-      group: ai-review-${{ github.event.pull_request.number || inputs.pr_number }}
-      cancel-in-progress: true
-    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Full history for better context
-      
-      - name: Determine PR Number
-        id: pr-number
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up environment variables
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
-          else
-            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
-          fi
-      
-      - name: Run AI Review Script
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO_NAME: ${{ github.repository }}
-          # Use the LM Studio instance on the self-hosted runner
-          INFERENCE_SERVER_URL: http://192.168.1.5:8080
-          # Performance settings (optional overrides)
-          REVIEW_DEPTH: ${{ inputs.review_depth || 'comprehensive' }}
+          echo "REPO_NAME=${{ github.repository }}" >> $GITHUB_ENV
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
+      - name: Run AI Review
         run: |
+          # Ejecutar el script shell desde el runner
           cd $HOME/actions-runner
-          # Make script executable
-          chmod +x ./run_ai_review.sh
-          
-          # Run the review
-          ./run_ai_review.sh ${{ steps.pr-number.outputs.pr_number }} --depth $REVIEW_DEPTH
-      
-      - name: Upload Review Statistics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: review-stats-pr-${{ steps.pr-number.outputs.pr_number }}
-          path: |
-            stats/review_stats_pr_*.json
-          retention-days: 30
-      
-      - name: Post Error Comment on Failure
-        if: failure()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_NUMBER="${{ steps.pr-number.outputs.pr_number }}"
-          
-          gh pr comment $PR_NUMBER --body "❌ **AI Code Review Failed**
-          
-          The AI review could not be completed. Please check:
-          - LM Studio is running on the self-hosted runner
-          - A model is loaded and ready
-          - The API is accessible at http://127.0.0.1:8080
-          
-          Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
-          
-          You can manually trigger the review again using the workflow dispatch once the issue is resolved."
+          ./run_ai_review.sh ${{ github.event.pull_request.number }} ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
