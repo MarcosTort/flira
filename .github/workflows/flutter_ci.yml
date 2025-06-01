@@ -17,7 +17,7 @@ jobs:
           echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
           echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
           echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
-
+          echo "INFERENCE_SERVER_URL=http://127.0.0.1:8080" >> $GITHUB_ENV
       - name: Run AI Review
         run: |
           # Ejecutar el script shell desde el runner
