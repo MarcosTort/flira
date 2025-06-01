@@ -30,7 +30,10 @@ class MyApp extends StatelessWidget {
                   SizedBox(height: 20),
                   Text('To open the report dialog, tap the expanded button'),
                   SizedBox(height: 20),
-                  Text('To Access the your jira account, fill the form and tap ok. Then tap the expanded button again', textAlign: TextAlign.center ,),
+                  Text(
+                    'To Access the your jira account, fill the form and tap ok. Then tap the expanded button again',
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ),

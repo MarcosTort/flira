@@ -1,9 +1,10 @@
+import 'package:atlassian_apis/jira_platform.dart' as j;
+import 'package:file_picker/file_picker.dart';
 import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:atlassian_apis/jira_platform.dart' as j;
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'widgets/widgets.dart';
-import 'package:file_picker/file_picker.dart';
 
 class ReportBugDialog extends StatefulWidget {
   const ReportBugDialog(

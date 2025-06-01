@@ -2,9 +2,10 @@ import 'package:flira/bloc/flira_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../flira.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shake/shake.dart';
+
+import '../flira.dart';
 
 class FliraOverlay extends StatelessWidget {
   const FliraOverlay({
@@ -12,7 +13,7 @@ class FliraOverlay extends StatelessWidget {
     Key? key,
   }) : super(key: key);
   final TriggeringMethod triggeringMethod;
-
+//asdaasdasdasdasdasdasdasdasdasdghjasd
   @override
   Widget build(BuildContext context) {
     Flira fliraClient = Flira();
@@ -75,7 +76,7 @@ class FliraOverlay extends StatelessWidget {
 }
 
 // class _FloatingButton extends StatelessWidget {
-//   const _FloatingButton({
+//   const _FloatingButton({asd
 //     Key? key,
 //     required this.fliraClient,
 //   }) : super(key: key);
@@ -225,7 +226,7 @@ class _SideButton extends StatelessWidget {
   }
 }
 
-class AnimatedLogo extends StatefulWidget  {
+class AnimatedLogo extends StatefulWidget {
   const AnimatedLogo({
     super.key,
   });
@@ -234,12 +235,12 @@ class AnimatedLogo extends StatefulWidget  {
   State<AnimatedLogo> createState() => _AnimatedLogoState();
 }
 
-class _AnimatedLogoState extends State<AnimatedLogo> with SingleTickerProviderStateMixin {
+class _AnimatedLogoState extends State<AnimatedLogo>
+    with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return RotationTransition(
       turns: CurvedAnimation(
-        
         parent: AnimationController(
           duration: const Duration(milliseconds: 2000),
           vsync: this,
