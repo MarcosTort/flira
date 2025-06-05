@@ -1,0 +1,25 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  ai-review:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up environment variables
+        run: |
+          echo "REPO_NAME=${{ github.repository }}" >> $GITHUB_ENV
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+          echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
+      - name: Run AI Review
+        run: |
+          # Ejecutar el script shell desde el runner
+          cd $HOME/actions-runner
+          ./run_ai_review.sh ${{ github.event.pull_request.number }} ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
